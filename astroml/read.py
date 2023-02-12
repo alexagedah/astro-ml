@@ -296,7 +296,7 @@ def split_snapshot_array(snapshot_array, grid_size = 5, periodic_bc = False):
 	X_t = np.concatenate(X_t_list, axis = 0)
 	return X_t
 
-def get_observations(data_relative_path, grid_size = 5):
+def get_observations(data_relative_path, grid_size=5, response="Time"):
 	"""
 	Return a design matrix and a response vector
 
@@ -306,6 +306,9 @@ def get_observations(data_relative_path, grid_size = 5):
 		A relative path to the folder containing the simulation data
 	grid_size : numpy.ndarray
 		The size of each grid to consider as an observation
+	response : str, default="Time"
+		The response variable that you are trying to predict. Options are "Time"
+		and "Magnetic Field Strength" (TODO)
 
 	Returns
 	-------
@@ -325,7 +328,7 @@ def get_observations(data_relative_path, grid_size = 5):
 	hdf5_files = get_hdf5_files(data_relative_path)
 	for file_name in hdf5_files:
 		t = int(file_name[5:9])
-		file_path = data_relative_path + pathlib.Path(file_name)
+		file_path = data_relative_path / pathlib.Path(file_name)
 		file_object = h5py.File(file_path, "r")
 		(B_x_t, B_y_t, B_z_t, p_t,
 		rho_t, v_x_t, v_y_t, v_z_t) = get_variables_at_snapshot(file_object)
