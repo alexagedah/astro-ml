@@ -251,8 +251,8 @@ def split_snapshot_array(snapshot_array, grid_size = 5, periodic_bc = False):
 	----------
 	snapshot_array : numpy.ndarray
 		4D array containing all the variables at a certain moment in time
-	grid_size :
-
+	grid_size : int
+		The size of each grid to consider as an observation
 	Returns
 	-------
 	X_t : numpy.ndarray
@@ -304,7 +304,7 @@ def get_observations(data_relative_path, grid_size=5, response="Time"):
 	----------
 	data_relative_path : pathlib.Path
 		A relative path to the folder containing the simulation data
-	grid_size : numpy.ndarray
+	grid_size : int
 		The size of each grid to consider as an observation
 	response : str, default="Time"
 		The response variable that you are trying to predict. Options are "Time"

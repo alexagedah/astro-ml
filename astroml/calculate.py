@@ -5,7 +5,6 @@ import scipy.constants as constants
 
 # Constants
 PERM_FREE_SPACE = constants.physical_constants["vacuum mag. permeability"][0]
-
 def cell_volume(X, Y, Z):
 	"""
 	Return the volume of each cell in a simulation

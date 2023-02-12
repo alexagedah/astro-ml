@@ -68,6 +68,7 @@ def regression_cnn(grid_size):
 	model.compile(loss="mse",
 	optimizer="adam")
 	return model
+
 def classification_cnn(grid_size, number_of_classes):
 	"""
 	Create a CNN to predict the time of a snapshot
@@ -104,6 +105,8 @@ def classification_cnn(grid_size, number_of_classes):
 	optimizer="adam",
 	metrics=["accuracy"])
 	return model
+
+
 
 
 
