@@ -25,7 +25,6 @@ def regression_mlp(grid_size):
 	"""
 	model_name = "time_2d_regression_mlp"
 	model = tf.keras.Sequential([
-		tf.keras.layers.Normalization(),
 		tf.keras.layers.Flatten(input_shape=(grid_size, grid_size)),
 		tf.keras.layers.Dense(50, activation="relu"),
 		tf.keras.layers.Dense(50, activation="relu"),
@@ -50,7 +49,6 @@ def regression_cnn(grid_size):
 			activation="relu",
 			kernel_initializer="he_normal")
 	model = tf.keras.Sequential([
-		tf.keras.layers.Normalization(),
 		DefaultConv2D(filters=64, kernel_size = 3, input_shape=(grid_size, grid_size)),
 		tf.keras.layers.MaxPool2D(pool_size=(2, 2)),
 		DefaultConv2D(filters = 128),
@@ -86,7 +84,6 @@ def classification_cnn(grid_size, number_of_classes):
 			kernel_initializer="he_normal")
 
 	model = tf.keras.Sequential([
-		tf.keras.layers.Normalization(),
 		DefaultConv2D(filters=64, kernel_size = 3, input_shape=(grid_size,grid_size)),
 		tf.keras.layers.MaxPool2D(pool_size=(2, 2)),
 		DefaultConv2D(filters = 128),
