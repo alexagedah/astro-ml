@@ -6,11 +6,12 @@ from the simulation came from
 from functools import partial
 
 import tensorflow as tf
+import keras_tuner as kt
 tf.random.set_seed(42)
 
 def regression_mlp(grid_size):
 	"""
-	Build a feed forward neural netwrok to predict the time of a snapshot
+	Build a regression multilayer perceptron to predict the time of a snapshot
 
 	Parameters
 	----------
@@ -26,13 +27,49 @@ def regression_mlp(grid_size):
 	model_name = "time_2d_regression_mlp"
 	model = tf.keras.Sequential([
 		tf.keras.layers.Flatten(input_shape=(grid_size, grid_size)),
-		tf.keras.layers.Dense(50, activation="relu"),
-		tf.keras.layers.Dense(50, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
 		tf.keras.layers.Dense(1)
 		])
 	model.compile(loss="mse",
 	optimizer="adam")
 	return model, model_name
+
+def classification_mlp(grid_size, number_of_classes):
+	"""
+	Build a classification multilayer perceptron to predict the time of a snapshot
+
+	Parameters
+	----------
+	grid_size : int
+
+	Returns
+	-------
+	model : tf.keras.Model
+	model_name : str
+		The name of the model. This determines what folder the checkpoints and
+		final model is saved to.
+	"""
+	model_name = "time_2d_classification_mlp"
+	model = tf.keras.Sequential([
+		tf.keras.layers.Flatten(input_shape=(grid_size, grid_size)),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(number_of_classes, activation="softmax")
+		])
+	model.compile(loss="sparse_categorical_crossentropy",
+	optimizer="adam",
+	metrics=["accuracy"])
+	return model, model_name
+
 
 def regression_cnn(grid_size):
 	"""
@@ -103,7 +140,26 @@ def classification_cnn(grid_size, number_of_classes):
 	metrics=["accuracy"])
 	return model
 
+def build_model(hp, grid_size):
+	"""
+	Build a regression multilayer perceptron
 
+	Parameters
+	----------
+	hp : keras_tuner.HyperParameters
 
+	Returns
+	-------
+	model : tf.keras.Model
+	"""
+    n_hidden = hp.Int("n_hidden", min_value=0, max_value=10, default=2)
+    n_neurons = hp.Int("n_neurons", min_value=grid_size, max_value=grid_size**2)
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Flatten())
+    for _ in range(n_hidden):
+        model.add(tf.keras.layers.Dense(n_neurons, activation="relu"))
+    model.add(tf.keras.layers.Dense(1))
+    model.compile(loss="mse", optimizer="adam")
+    return model
 
 
