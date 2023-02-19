@@ -16,3 +16,4 @@ exploration.py
 # Model fitting
 astroml/saved_models
 astroml/training
+astroml/learning_curves

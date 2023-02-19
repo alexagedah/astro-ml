@@ -1,8 +1,12 @@
 """
 Module for producing graphs
 """
+import pathlib
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import pandas as pd
+import tensorflow as tf
 mpl.rcParams["font.family"] = "Times New Roman"
 plt.style.use("default")
 
@@ -55,3 +59,26 @@ def plot_2d_variable(variable, variable_name, time, z = 0):
 	CS = ax.contour(X[:], Y[:],Z[:]) 
 	ax.clabel(CS, inline=True, fontsize=5)
 	plt.show()
+
+def plot_learning_curve(history, model_name):
+	"""
+	Plot the learning curve of a artificial neural network
+
+	Parameters
+	----------
+	history : tf.keras.callbacks.History
+	model_name : str
+		The name of the model
+	"""
+	history_df = pd.DataFrame(history.history)
+	fig = plt.figure(figsize=(10,6))
+	ax1 = fig.add_subplot(1,1,1)
+	ax1.set_title("Learning Curve")
+	ax1.set_ylabel("Loss")
+	ax1.set_xlabel("Epochs")
+	ax1.plot(history_df.iloc[:,0], label="Training Loss")
+	ax1.plot(history_df.iloc[:,1], label="Validation Loss")
+	plt.show()
+	save_path = (pathlib.Path("astroml") / pathlib.Path("learning_curves")
+		/ pathlib.Path(model_name))
+	fig.savefig(save_path)

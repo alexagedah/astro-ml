@@ -1,3 +1,11 @@
+from . import (
+	models
+	)
+
+from .preprocessing import (
+	preprocessor
+	)
+
 from .read import (
 	get_all_observations,
 	get_cell_coordinates,
@@ -6,10 +14,6 @@ from .read import (
 	get_variables
 	)
 
-from .preprocessing import (
-	preprocessor
-	)
-
-from . import (
-	models
+from .train import (
+	train_model
 	)
