@@ -12,3 +12,7 @@ main.py
 nn.py
 chi.py
 exploration.py
+
+# Model fitting
+astroml/saved_models
+astroml/training
