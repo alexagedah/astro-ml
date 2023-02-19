@@ -298,7 +298,8 @@ def split_snapshot_array(snapshot_array, grid_size = 5, periodic_bc = False):
 
 def get_observations(data_relative_path, grid_size=5, response="Time"):
 	"""
-	Return a design matrix and a response vector
+	Return a design matrix and a response vector where all observations come
+	from the same simulation
 
 	Parameters
 	----------
@@ -308,7 +309,7 @@ def get_observations(data_relative_path, grid_size=5, response="Time"):
 		The size of each grid to consider as an observation
 	response : str, default="Time"
 		The response variable that you are trying to predict. Options are "Time"
-		and "Magnetic Field Strength" (TODO)
+		and "Chi"
 
 	Returns
 	-------
@@ -324,10 +325,8 @@ def get_observations(data_relative_path, grid_size=5, response="Time"):
 	"""
 	x_observation_list = []
 	y_observation_list = []
-
 	hdf5_files = get_hdf5_files(data_relative_path)
 	for file_name in hdf5_files:
-		t = int(file_name[5:9])
 		file_path = data_relative_path / pathlib.Path(file_name)
 		file_object = h5py.File(file_path, "r")
 		(B_x_t, B_y_t, B_z_t, p_t,
@@ -335,13 +334,76 @@ def get_observations(data_relative_path, grid_size=5, response="Time"):
 		snapshot_array = create_snapshot_array(B_x_t, B_y_t, B_z_t, p_t,
 												rho_t, v_x_t, v_y_t, v_z_t)
 		X_t = split_snapshot_array(snapshot_array, grid_size)
-		y_t = np.full((X_t.shape[0], ), t)
-
 		x_observation_list.append(X_t)
-		y_observation_list.append(y_t)
 
+		if response == "Time":
+			t = int(file_name[5:9])
+			y_t = np.full((X_t.shape[0], ), t)
+		elif response == "Chi":
+			chi = float(data_relative_path.stem + data_relative_path.suffix)
+			y_t = np.full((X_t.shape[0], ), chi)
+		y_observation_list.append(y_t)
 	X = np.concatenate(x_observation_list, axis = 0)
 	y = np.concatenate(y_observation_list, axis = 0)
+	return X, y
+
+def get_simulation_folders(data_path):
+	"""
+	Parameters
+	----------
+	data_path : pathlib.Path
+		A relative path to the folder containing all the simulations
+	Returns
+	-------
+	simulation_paths : list of pathlib.Path
+		List containing relative paths to all the folders containing simulation
+		data
+	"""
+	folders = os.listdir(data_path)
+	simulation_paths = []
+	for folder_name in folders:
+		if folder_name.endswith(".DS_Store"):
+			continue
+		else:
+			simulation_paths.append(data_path / pathlib.Path(folder_name))
+	return simulation_paths
+
+def get_all_observations(data_path, grid_size, response="Time"):
+	"""
+	Return design matrix and vector of responses where observations come from
+	all the simulations that are in the specified folder
+
+	Parameters
+	----------
+	data_path : pathlib.Path
+		A relative path to the folder containing all the simulations
+	grid_size : int
+		The size of each grid to consider as an observation
+	response : str, default="Time"
+		The response variable that you are trying to predict. Options are "Time"
+		and "Chi"
+
+	Returns
+	-------
+	X : numpy.ndarray
+		5D array representing the design matrix
+			The 0th axis specifies the observation
+			The 1st axis represents the x-direction
+			The 2nd axis represents the y-direction
+			The 3rd axis represents the z-direction
+			The 4th axis represents the 8 different predictor variables
+	y : numpy.ndarray
+		1D array representing the response vector
+	"""
+	X_list = []
+	y_list = []
+	simulation_paths = get_simulation_folders(data_path)
+	for path in simulation_paths:
+		X_sim, y_sim = get_observations(path, grid_size, response)
+		X_list.append(X_sim)
+		y_list.append(y_sim)
+	X = np.concatenate(X_list, axis = 0)
+	y = np.concatenate(y_list, axis = 0)
 	return X, y
 
 def variables_to_desgin_matrix(T, variables, grid_size = 5, periodic_bc = False):
