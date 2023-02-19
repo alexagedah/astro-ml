@@ -9,14 +9,14 @@ import tensorflow as tf
 import keras_tuner as kt
 tf.random.set_seed(42)
 
-def regression_mlp(grid_size):
+def regression_mlp(X_train):
 	"""
 	Build a regression multilayer perceptron to predict the time of a snapshot
 
 	Parameters
 	----------
-	grid_size : int
-
+	X_train : numpy.ndarray
+		Design matrix
 	Returns
 	-------
 	model : tf.keras.Model
@@ -26,7 +26,7 @@ def regression_mlp(grid_size):
 	"""
 	model_name = "time_2d_regression_mlp"
 	model = tf.keras.Sequential([
-		tf.keras.layers.Flatten(input_shape=(grid_size, grid_size)),
+		tf.keras.layers.Flatten(input_shape=X_train.shape[1:]),
 		tf.keras.layers.Dense(20, activation="relu"),
 		tf.keras.layers.Dense(20, activation="relu"),
 		tf.keras.layers.Dense(20, activation="relu"),
@@ -39,7 +39,7 @@ def regression_mlp(grid_size):
 	optimizer="adam")
 	return model, model_name
 
-def classification_mlp(grid_size, number_of_classes):
+def classification_mlp(X_train, y_train):
 	"""
 	Build a classification multilayer perceptron to predict the time of a snapshot
 
@@ -54,9 +54,10 @@ def classification_mlp(grid_size, number_of_classes):
 		The name of the model. This determines what folder the checkpoints and
 		final model is saved to.
 	"""
+	number_of_classes = len(np.unique(y_train))
 	model_name = "time_2d_classification_mlp"
 	model = tf.keras.Sequential([
-		tf.keras.layers.Flatten(input_shape=(grid_size, grid_size)),
+		tf.keras.layers.Flatten(input_shape=X_train.input_shape[1:]),
 		tf.keras.layers.Dense(20, activation="relu"),
 		tf.keras.layers.Dense(20, activation="relu"),
 		tf.keras.layers.Dense(20, activation="relu"),
@@ -70,8 +71,7 @@ def classification_mlp(grid_size, number_of_classes):
 	metrics=["accuracy"])
 	return model, model_name
 
-
-def regression_cnn(grid_size):
+def regression_cnn(X_train):
 	"""
 	Parameters
 	----------
@@ -86,7 +86,7 @@ def regression_cnn(grid_size):
 			activation="relu",
 			kernel_initializer="he_normal")
 	model = tf.keras.Sequential([
-		DefaultConv2D(filters=64, kernel_size = 3, input_shape=(grid_size, grid_size)),
+		DefaultConv2D(filters=64, kernel_size = 3, input_shape=X_train.shape[1:]),
 		tf.keras.layers.MaxPool2D(pool_size=(2, 2)),
 		DefaultConv2D(filters = 128),
 		DefaultConv2D(filters = 128),
@@ -104,7 +104,7 @@ def regression_cnn(grid_size):
 	optimizer="adam")
 	return model
 
-def classification_cnn(grid_size, number_of_classes):
+def classification_cnn(X_train, number_of_classes):
 	"""
 	Create a CNN to predict the time of a snapshot
 
@@ -113,6 +113,7 @@ def classification_cnn(grid_size, number_of_classes):
 	grid_size : int
 	number_of_classes : int
 	"""
+	number_of_classes = len(np.unique(y_train))
 	model_name = "time_2d_classification_cnn"
 	DefaultConv2D = partial(tf.keras.layers.Conv2D,
 			kernel_size = 3,
@@ -121,7 +122,7 @@ def classification_cnn(grid_size, number_of_classes):
 			kernel_initializer="he_normal")
 
 	model = tf.keras.Sequential([
-		DefaultConv2D(filters=64, kernel_size = 3, input_shape=(grid_size,grid_size)),
+		DefaultConv2D(filters=64, kernel_size = 3, input_shape=X_train.shape[1:]),
 		tf.keras.layers.MaxPool2D(pool_size=(2, 2)),
 		DefaultConv2D(filters = 128),
 		DefaultConv2D(filters = 128),
@@ -140,26 +141,26 @@ def classification_cnn(grid_size, number_of_classes):
 	metrics=["accuracy"])
 	return model
 
-def build_model(hp, grid_size):
-	"""
-	Build a regression multilayer perceptron
+# def build_model(hp, grid_size):
+# 	"""
+# 	Build a regression multilayer perceptron
 
-	Parameters
-	----------
-	hp : keras_tuner.HyperParameters
+# 	Parameters
+# 	----------
+# 	hp : keras_tuner.HyperParameters
 
-	Returns
-	-------
-	model : tf.keras.Model
-	"""
-    n_hidden = hp.Int("n_hidden", min_value=0, max_value=10, default=2)
-    n_neurons = hp.Int("n_neurons", min_value=grid_size, max_value=grid_size**2)
-    model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Flatten())
-    for _ in range(n_hidden):
-        model.add(tf.keras.layers.Dense(n_neurons, activation="relu"))
-    model.add(tf.keras.layers.Dense(1))
-    model.compile(loss="mse", optimizer="adam")
-    return model
+# 	Returns
+# 	-------
+# 	model : tf.keras.Model
+# 	"""
+#     n_hidden = hp.Int("n_hidden", min_value=0, max_value=10, default=2)
+#     n_neurons = hp.Int("n_neurons", min_value=grid_size, max_value=grid_size**2)
+#     model = tf.keras.Sequential()
+#     model.add(tf.keras.layers.Flatten())
+#     for _ in range(n_hidden):
+#         model.add(tf.keras.layers.Dense(n_neurons, activation="relu"))
+#     model.add(tf.keras.layers.Dense(1))
+#     model.compile(loss="mse", optimizer="adam")
+#     return model
 
 
