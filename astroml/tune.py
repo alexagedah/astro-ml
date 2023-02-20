@@ -19,10 +19,10 @@ def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, over
 	X_valid : numpy.ndarray
 	y_train : numpy.ndarray
 	y_valid : numpy.ndarray
-	overwrite : bool
+	overwrite : bool, default=False
 		If False, reloads an existing project of the same name if one is found. 
 		Otherwise overwrites the project
-	max_trials : int
+	max_trials : int, default=
 		The total number of trials (model configurations) to test at most
 	"""
 	early_stopping_cb = tf.keras.callbacks.EarlyStopping(patience=5,
@@ -45,6 +45,10 @@ def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, over
 def load_optimisation_results(build_model, model_name):
 	"""
 	Display the results from hyperparameter tuning for a model
+
+	Parameters
+	----------
+	
 	"""
 	random_search_tuner = kt.RandomSearch(
 								build_model,
