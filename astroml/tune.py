@@ -1,0 +1,54 @@
+"""
+Module for tuning hyperparameters for models.
+"""
+import tensorflow as tf
+import keras_tuner as kt
+
+
+tf.random.set_seed(42)
+
+def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, overwrite=False):
+	"""
+	Perform hyperparameter tuning for a model and display the results
+
+	Parameters
+	----------
+	build_model : function
+	model_name : str
+	X_train : numpy.ndarray
+	X_valid : numpy.ndarray
+	y_train : numpy.ndarray
+	y_valid : numpy.ndarray
+	overwrite : bool
+		If False, reloads an existing project of the same name if one is found. 
+		Otherwise overwrites the project
+	"""
+	early_stopping_cb = tf.keras.callbacks.EarlyStopping(patience=5,
+	                                                    restore_best_weights=True)
+	random_search_tuner = kt.RandomSearch(
+								build_model,
+								objective="val_loss",
+								max_trials = 10,
+								overwrite=overwrite,
+								directory="hp_tuning",
+								project_name=model_name,
+								)
+	random_search_tuner.search(X_train, y_train, epochs =1000,
+		validation_data=(X_valid, y_valid),
+		callbacks = [early_stopping_cb])
+	random_search_tuner.results_summary()
+
+def load_optimisation_results(build_model, model_name):
+	"""
+	Display the results from hyperparameter tuning for a model
+	"""
+	random_search_tuner = kt.RandomSearch(
+								build_model,
+								objective="val_loss",
+								overwrite=False,
+								directory="hp_tuning",
+								project_name=model_name,
+								)
+	random_search_tuner.results_summary()
+
+

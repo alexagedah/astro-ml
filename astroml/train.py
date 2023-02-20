@@ -8,6 +8,9 @@ import tensorflow as tf
 
 from . import plot
 
+
+tf.random.set_seed(42)
+
 def train_model(model, model_name, X_train, X_valid, y_train, y_valid):
 	"""
 	Train the model using checkpoints during training and early stopping and save
@@ -22,12 +25,12 @@ def train_model(model, model_name, X_train, X_valid, y_train, y_valid):
 	y_train : numpy.ndarray
 	y_valid : numpy.ndarray
 	"""
-	checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(f"astroml/training/{model_name}/my_checkpoints",
+	checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(f"training/{model_name}/my_checkpoints",
                                                   save_weights_only = True)
 	early_stopping_cb = tf.keras.callbacks.EarlyStopping(patience=10,
 	                                                    restore_best_weights=True)
 
-	history = history = model.fit(X_train, y_train, epochs = 1000,
+	history = history = model.fit(X_train, y_train, epochs = 2,
 								validation_data=(X_valid, y_valid),
 								callbacks = [checkpoint_cb, early_stopping_cb])
 	model.save(f"astroml/saved_models/{model_name}")

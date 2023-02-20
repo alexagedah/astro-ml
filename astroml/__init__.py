@@ -17,3 +17,8 @@ from .read import (
 from .train import (
 	train_model
 	)
+
+from .tune import (
+	load_optimisation_results,
+	tune_model
+	)

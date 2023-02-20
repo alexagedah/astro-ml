@@ -6,14 +6,13 @@ __pycache__/
 *.ipynb
 
 *.h5
-data
 
-main.py
-nn.py
-chi.py
-exploration.py
+trainer.py
+tuner.py
 
 # Model fitting
+data
+training
+learning_curves
+hp_tuning
 astroml/saved_models
-astroml/training
-astroml/learning_curves

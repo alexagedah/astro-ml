@@ -82,6 +82,5 @@ def plot_learning_curve(history, model_name):
 	ax1.set_ylim(0, history_df.values.flatten().max())
 	ax1.legend()
 	plt.show()
-	save_path = (pathlib.Path("astroml") / pathlib.Path("learning_curves")
-		/ pathlib.Path(model_name))
+	save_path = pathlib.Path("learning_curves") / pathlib.Path(model_name)
 	fig.savefig(save_path)
