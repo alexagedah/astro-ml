@@ -53,7 +53,7 @@ def hp_regression_mlp(hp):
 	-------
 	model : tf.keras.Model
 	"""
-	n_hidden = hp.Int("n_hidden", min_value=1, max_value=64, step=2, sampling="log")
+	n_hidden = hp.Int("n_hidden", min_value=4, max_value=16, step=2, sampling="log")
 	n_neurons = hp.Int("n_neurons", min_value=32, max_value=256, step=2, sampling="log")
 	model = tf.keras.Sequential()
 	model.add(tf.keras.layers.Flatten())
