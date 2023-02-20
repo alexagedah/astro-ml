@@ -6,6 +6,7 @@ __pycache__/
 *.ipynb
 
 *.h5
+*.docx
 
 trainer.py
 tuner.py
