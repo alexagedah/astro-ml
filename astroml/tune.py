@@ -7,7 +7,7 @@ import keras_tuner as kt
 
 tf.random.set_seed(42)
 
-def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, overwrite=False):
+def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, overwrite=False, max_trials=10):
 	"""
 	Perform hyperparameter tuning for a model and display the results
 
@@ -22,13 +22,15 @@ def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, over
 	overwrite : bool
 		If False, reloads an existing project of the same name if one is found. 
 		Otherwise overwrites the project
+	max_trials : int
+		The total number of trials (model configurations) to test at most
 	"""
 	early_stopping_cb = tf.keras.callbacks.EarlyStopping(patience=5,
 	                                                    restore_best_weights=True)
 	random_search_tuner = kt.RandomSearch(
 								build_model,
 								objective="val_loss",
-								max_trials = 10,
+								max_trials = max_trials,
 								overwrite=overwrite,
 								directory="hp_tuning",
 								project_name=model_name,
@@ -36,6 +38,8 @@ def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, over
 	random_search_tuner.search(X_train, y_train, epochs =1000,
 		validation_data=(X_valid, y_valid),
 		callbacks = [early_stopping_cb])
+	random_search_tuner.search_space_summary(extended=True)
+	print()
 	random_search_tuner.results_summary()
 
 def load_optimisation_results(build_model, model_name):
@@ -49,6 +53,8 @@ def load_optimisation_results(build_model, model_name):
 								directory="hp_tuning",
 								project_name=model_name,
 								)
+	random_search_tuner.search_space_summary(extended=True)
+	print()
 	random_search_tuner.results_summary()
 
 
