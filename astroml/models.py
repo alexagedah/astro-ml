@@ -1,16 +1,13 @@
 """
-Module for building artificial neural networks to predict the time a snapshot
-from the simulation came from
+Module for building artificial neural networks
 """
 # Import libraries
-from functools import partial
-
 import numpy as np
 import tensorflow as tf
 import keras_tuner as kt
 tf.random.set_seed(42)
 
-def regression_mlp(X_train):
+def MLP(X_train):
 	"""
 	Build a regression multilayer perceptron to predict the time of a snapshot
 
@@ -26,15 +23,13 @@ def regression_mlp(X_train):
 		final model is saved to.
 	"""
 	grid_size = X_train.shape[1]
-	model_name = "regression_mlp"
+	model_name = "MLP"
 	model = tf.keras.Sequential([
 		tf.keras.layers.Flatten(input_shape=X_train.shape[1:]),
-		tf.keras.layers.Dense(20, activation="relu"),
-		tf.keras.layers.Dense(20, activation="relu"),
-		tf.keras.layers.Dense(20, activation="relu"),
-		tf.keras.layers.Dense(20, activation="relu"),
-		tf.keras.layers.Dense(20, activation="relu"),
-		tf.keras.layers.Dense(20, activation="relu"),
+		tf.keras.layers.Dense(256, activation="relu"),
+		tf.keras.layers.Dense(256, activation="relu"),
+		tf.keras.layers.Dense(256, activation="relu"),
+		tf.keras.layers.Dense(256, activation="relu"),
 		tf.keras.layers.Dense(1)
 		])
 	model.compile(loss="mse",
@@ -88,7 +83,7 @@ def regression_cnn(X_train):
 	model.compile(loss="mse", optimizer="adam")
 	return model, model_name
 
-def hp_regression_cnn(hp):
+def MLP_tuner(hp):
 	"""
 	Build a regression convolutional neural network with hyperparameters that can
 	be tuned

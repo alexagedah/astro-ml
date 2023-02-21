@@ -296,7 +296,7 @@ def split_snapshot_array(snapshot_array, grid_size = 5, periodic_bc = False):
 	X_t = np.concatenate(X_t_list, axis = 0)
 	return X_t
 
-def get_observations(data_relative_path, grid_size=5, response="Time"):
+def get_observations(data_relative_path, grid_size=5, response="time"):
 	"""
 	Return a design matrix and a response vector where all observations come
 	from the same simulation
@@ -336,10 +336,10 @@ def get_observations(data_relative_path, grid_size=5, response="Time"):
 		X_t = split_snapshot_array(snapshot_array, grid_size)
 		x_observation_list.append(X_t)
 
-		if response == "Time":
+		if response == "time":
 			t = int(file_name[5:9])
 			y_t = np.full((X_t.shape[0], ), t)
-		elif response == "Chi":
+		elif response == "chi":
 			chi = float(data_relative_path.stem + data_relative_path.suffix)
 			y_t = np.full((X_t.shape[0], ), chi)
 		y_observation_list.append(y_t)
