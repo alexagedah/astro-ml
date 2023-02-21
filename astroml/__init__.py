@@ -1,5 +1,12 @@
-from . import (
-	models
+from .models import (
+	MLP,
+	MLP_tuner
+	)
+
+from .plot import (
+	plot_2d_variable,
+	plot_distribution,
+	plot_learning_curve
 	)
 
 from .preprocessing import (
