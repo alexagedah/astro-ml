@@ -5,6 +5,8 @@ format suitable for supervised learning
 # 3rd Party
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
 
 def remove_extra_dimesions(X):
 	"""
@@ -39,7 +41,7 @@ def remove_extra_dimesions(X):
 	else:
 		return X
 
-def train_valid_test_split(X, y, train_size=0.8, valid_size=0.1):
+def train_valid_test_split(X, y, train_size, valid_size):
 	"""
 	Split a data set into a training set, a validation set and a test set
 
@@ -49,9 +51,9 @@ def train_valid_test_split(X, y, train_size=0.8, valid_size=0.1):
 		The design matrix
 	y : numpy.ndarray
 		The response variable
-	train_size : float, default=0.8
+	train_size : float
 		The proportion of the data set to put into the training set
-	valid_size : float, default=0.1
+	valid_size : float
 		The proportion of the data set to put into the validation set
 
 	Returns
@@ -76,13 +78,68 @@ def train_valid_test_split(X, y, train_size=0.8, valid_size=0.1):
 					random_state = 42)
 	return X_train, X_valid, X_test, y_train, y_valid, y_test
 
-def structurer(X, y, train_size=0.8, valid_size=0.1):
+def standard_scaler(X_train, X_valid):
 	"""
-	Structure the data so it is ready for machine learning
+	Standardise the predictors
 
-	This function removes extra dimesnions from the matrix of predictors if the
-	simulation is 2D. It then splits the data set into training, validation and
-	test data sets.
+	Parameters
+	---------
+	X_train : numpy.ndarray
+		4D or 5D numpy.ndarray representing the matrix of predictors for the
+		training data set
+	X_valid : numpy.ndarray
+		4D or 5D numpy.ndarray representing the matrix of predictors for the
+		validation data set
+
+	Returns
+	-------
+	X_train_scaled : numpy.ndarray
+	X_valid_scaled : numpy.ndarray
+	norm_layer : tf.keras.layers.Normalization
+		The fitted normalisation layer
+	"""
+	norm_layer = tf.keras.layers.Normalization()
+	norm_layer.adapt(X_train)
+	X_train_scaled = norm_layer(X_train)
+	X_valid_scaled = norm_layer(X_valid)
+	return X_train_scaled, X_valid_scaled, norm_layer
+
+def min_max_scaler(y_train, y_valid):
+	"""
+	Apply min-max scaling to the vector of response
+
+	Parameters
+	---------
+	y_train : numpy.ndarray
+		1D numpy.ndarray representing the vector of response for the training
+		data set
+	y_valid : numpy.ndarray
+		1D numpy.ndarray representing the vector of response for the validation
+		data set
+
+	Returns
+	-------
+	y_train_scaled : numpy.ndarray
+	y_valid_scaled : numpy.ndarray
+	min_max_scaler : sklearn.preprocessing.MinMaxScaler
+		The transformer for min-max scaling
+	"""
+	min_max_scaler = MinMaxScaler(feature_range=(-1,1))
+	y_train_scaled = min_max_scaler.fit_transform(y_train)
+	y_valid_scaled = min_max_scaler.transform(y_valid)
+	return y_train_scaled, y_valid_scaled, min_max_scaler
+
+def preprocessor(X, y, train_size=0.8, valid_size=0.1):
+	"""
+	Preprocess the data so it is ready for machine learning
+
+	Preprocessing steps
+
+		#. Remove extra dimensions from the matrix of predictors if the
+		simulation is 2D
+		#. It splits the data set into training, validation and test data sets
+		#. Apply standard scaling to the predictors
+		#. Apply min-max scaling to the response so that it is between -1 and 1
 
 	Parameters
 	----------
@@ -127,8 +184,16 @@ def structurer(X, y, train_size=0.8, valid_size=0.1):
 	y_test : numpy.ndarray
 		1D numpy.ndarray representing the vector of response for the test
 		data set
+	norm_layer : tf.keras.layers.Normalization
+	min_max_scaler : sklearn.preprocessing.MinMaxScaler
 	"""
 	X = remove_extra_dimesions(X)
 	(X_train, X_valid, X_test,
 	y_train, y_valid, y_test) = train_valid_test_split(X, y, train_size, valid_size)
-	return X_train, X_valid, X_test, y_train, y_valid, y_test
+	X_train, X_valid, norm_layer = standard_scaler(X_train, X_valid)
+	y_train, y_valid, min_max_scaler = min_max_scaler(y_train, y_valid)
+	return X_train, X_valid, X_test, y_train, y_valid, y_test, norm_layer, min_max_scaler
+
+
+
+
