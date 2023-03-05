@@ -7,13 +7,15 @@ import os
 # 3rd Party
 import tensorflow as tf
 # Libary Specific
-from . import plot
+from . import evaluate, plot
 
 tf.random.set_seed(42)
 
-def train_model(model, model_name, X_train, X_valid, y_train, y_valid, norm_layer, epochs=1000):
+def train_model(model, model_name, X_train, X_valid, y_train, y_valid, epochs=1000):
 	"""
 	Train the model, save it and plot the learning curve for the model
+
+	This function is ideal for training custom models.
 
 	Parameters
 	----------
@@ -33,10 +35,13 @@ def train_model(model, model_name, X_train, X_valid, y_train, y_valid, norm_laye
 	y_valid : numpy.ndarray
 		numpy.ndarray representing the vector of responses for the validation
 		data set
-	norm_layer : tf.keras.layers.Normalization
-		The fitted normalisation layer
 	epochs: int, default=1000
 		The number of epochs to train for
+
+	Returns
+	-------
+	model : tf.keras.Model
+		The fitted model
 	"""
 	checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(f"training/{model_name}/my_checkpoints",
                                                   save_weights_only = True)
@@ -47,3 +52,6 @@ def train_model(model, model_name, X_train, X_valid, y_train, y_valid, norm_laye
 								callbacks = [checkpoint_cb, early_stopping_cb])
 	model.save(f"astroml/saved_models/{model_name}")
 	plot.plot_learning_curve(history, model_name)
+	return model
+
+

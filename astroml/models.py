@@ -7,15 +7,14 @@ import tensorflow as tf
 
 tf.random.set_seed(42)
 
-def get_regression_mlp(X_train, response, n_hidden_layers=4, n_hidden_units=256):
+def get_regression_mlp(input_shape, response, n_hidden_layers=4, n_hidden_units=256):
 	"""
 	Return a multilayer perceptron for regression
 
 	Parameters
 	----------
-	X_train : numpy.ndarray
-		numpy.ndarray representing the matrix of predictors for the training
-		data set
+	input_shape : int
+		The shape of the inputs
 	response : str
 		The name of the response variable 
 	n_hidden_layers : int, default=4
@@ -34,8 +33,7 @@ def get_regression_mlp(X_train, response, n_hidden_layers=4, n_hidden_units=256)
 
 	"""
 	model = tf.keras.Sequential()
-	input_shape = X_train.shape[1:]
-	model.add(tf.keras.layers.Input(X_train.shape[1:]))
+	model.add(tf.keras.layers.Input(input_shape))
 	model.add(tf.keras.layers.Flatten())
 	for _ in range(n_hidden_layers):
 		model.add(tf.keras.layers.Dense(n_hidden_units, activation="relu"))

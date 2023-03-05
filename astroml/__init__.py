@@ -1,6 +1,11 @@
 from .calculate import (
 	magnetic_energy,
-	magnetic_energy_density)
+	magnetic_energy_density
+	)
+
+from .evaluate import (
+	evaluate_model
+	)
 
 from .models import (
 	get_regression_mlp,
