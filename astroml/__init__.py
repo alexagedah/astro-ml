@@ -17,7 +17,10 @@ from .plot import (
 	)
 
 from .preprocessing import (
-	preprocessor
+	preprocessor,
+	physical_preprocessor,
+	standard_preprocessor,
+	dumb_preprocessor
 	)
 
 from .read import (
