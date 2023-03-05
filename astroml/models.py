@@ -7,7 +7,7 @@ import tensorflow as tf
 
 tf.random.set_seed(42)
 
-def get_regression_mlp(X_train, n_hidden_layers=4, n_hidden_units=256):
+def get_regression_mlp(X_train, response, n_hidden_layers=4, n_hidden_units=256):
 	"""
 	Return a multilayer perceptron for regression
 
@@ -16,6 +16,8 @@ def get_regression_mlp(X_train, n_hidden_layers=4, n_hidden_units=256):
 	X_train : numpy.ndarray
 		numpy.ndarray representing the matrix of predictors for the training
 		data set
+	response : str
+		The name of the response variable 
 	n_hidden_layers : int, default=4
 		The number of hidden layers
 	n_hidden_units : int, default=256
@@ -28,7 +30,7 @@ def get_regression_mlp(X_train, n_hidden_layers=4, n_hidden_units=256):
 	model_name : str
 		The name of the model. This determines what folder the checkpoints and
 		final model is saved to. The format for the name of the model is 
-		<grid_size>_<n_hidden_layers>_<n_hidden_units>.
+		<grid_size>_<n_hidden_layers>_<n_hidden_units>_<response>
 
 	"""
 	model = tf.keras.Sequential()
@@ -40,7 +42,7 @@ def get_regression_mlp(X_train, n_hidden_layers=4, n_hidden_units=256):
 	model.add(tf.keras.layers.Dense(1))
 	model.compile(loss="mse",
 	optimizer="adam")
-	model_name = f"{input_shape[0]}_{n_hidden_layers}_{n_hidden_units}"
+	model_name = f"{input_shape[0]}_{n_hidden_layers}_{n_hidden_units}_{response}"
 	return model, model_name
 
 def get_hp_regression_mlp(hp):
