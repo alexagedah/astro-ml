@@ -9,10 +9,9 @@ import tensorflow as tf
 # Libary Specific
 from . import plot
 
-
 tf.random.set_seed(42)
 
-def train_model(model, model_name, X_train, X_valid, y_train, y_valid, epochs=1000):
+def train_model(model, model_name, X_train, X_valid, y_train, y_valid, norm_layer, epochs=1000):
 	"""
 	Train the model, save it and plot the learning curve for the model
 
@@ -34,6 +33,8 @@ def train_model(model, model_name, X_train, X_valid, y_train, y_valid, epochs=10
 	y_valid : numpy.ndarray
 		numpy.ndarray representing the vector of responses for the validation
 		data set
+	norm_layer : tf.keras.layers.Normalization
+		The fitted normalisation layer
 	epochs: int, default=1000
 		The number of epochs to train for
 	"""
@@ -41,7 +42,7 @@ def train_model(model, model_name, X_train, X_valid, y_train, y_valid, epochs=10
                                                   save_weights_only = True)
 	early_stopping_cb = tf.keras.callbacks.EarlyStopping(patience=5,
 	                                                    restore_best_weights=True)
-	history = history = model.fit(X_train, y_train, epochs=epochs,
+	history = model.fit(X_train, y_train, epochs=epochs,
 								validation_data=(X_valid, y_valid),
 								callbacks = [checkpoint_cb, early_stopping_cb])
 	model.save(f"astroml/saved_models/{model_name}")

@@ -78,7 +78,7 @@ def train_valid_test_split(X, y, train_size, valid_size):
 					random_state = 42)
 	return X_train, X_valid, X_test, y_train, y_valid, y_test
 
-def standard_scaler(X_train, X_valid):
+def standard_scaler(X_train, X_valid, X_test):
 	"""
 	Standardise the predictors
 
@@ -90,11 +90,15 @@ def standard_scaler(X_train, X_valid):
 	X_valid : numpy.ndarray
 		4D or 5D numpy.ndarray representing the matrix of predictors for the
 		validation data set
-
+	X_test : numpy.ndarray
+		4D or 5D numpy.ndarray representing the matrix of predictors for the
+		test data set
 	Returns
 	-------
 	X_train_scaled : numpy.ndarray
 	X_valid_scaled : numpy.ndarray
+	X_test_scaled : numpy.ndarray
+
 	norm_layer : tf.keras.layers.Normalization
 		The fitted normalisation layer
 	"""
@@ -102,9 +106,10 @@ def standard_scaler(X_train, X_valid):
 	norm_layer.adapt(X_train)
 	X_train_scaled = norm_layer(X_train)
 	X_valid_scaled = norm_layer(X_valid)
-	return X_train_scaled, X_valid_scaled, norm_layer
+	X_test_scaled = norm_layer(X_test)
+	return X_train_scaled, X_valid_scaled, X_test_scaled
 
-def min_max_scaler(y_train, y_valid):
+def min_max_scaler(y_train, y_valid, y_test):
 	"""
 	Apply min-max scaling to the vector of response
 
@@ -116,18 +121,23 @@ def min_max_scaler(y_train, y_valid):
 	y_valid : numpy.ndarray
 		1D numpy.ndarray representing the vector of response for the validation
 		data set
+	y_test : numpy.ndarray
+		1D numpy.ndarray representing the vector of response for the test
+		data set
 
 	Returns
 	-------
 	y_train_scaled : numpy.ndarray
 	y_valid_scaled : numpy.ndarray
-	min_max_scaler : sklearn.preprocessing.MinMaxScaler
+	y_test_scaled : numpy.ndarray
+	min_max_transformer : sklearn.preprocessing.MinMaxScaler
 		The transformer for min-max scaling
 	"""
-	min_max_scaler = MinMaxScaler(feature_range=(-1,1))
-	y_train_scaled = min_max_scaler.fit_transform(y_train)
-	y_valid_scaled = min_max_scaler.transform(y_valid)
-	return y_train_scaled, y_valid_scaled, min_max_scaler
+	min_max_transformer = MinMaxScaler(feature_range=(-1,1))
+	y_train_scaled = min_max_transformer.fit_transform(y_train.reshape(-1, 1))
+	y_valid_scaled = min_max_transformer.transform(y_valid.reshape(-1,1))
+	y_test_scaled = min_max_transformer.transform(y_test.reshape(-1,1))
+	return y_train_scaled, y_valid_scaled, y_test_scaled, min_max_transformer
 
 def preprocessor(X, y, train_size=0.8, valid_size=0.1):
 	"""
@@ -184,15 +194,14 @@ def preprocessor(X, y, train_size=0.8, valid_size=0.1):
 	y_test : numpy.ndarray
 		1D numpy.ndarray representing the vector of response for the test
 		data set
-	norm_layer : tf.keras.layers.Normalization
-	min_max_scaler : sklearn.preprocessing.MinMaxScaler
+	min_max_transformer : sklearn.preprocessing.MinMaxScaler
 	"""
 	X = remove_extra_dimesions(X)
 	(X_train, X_valid, X_test,
 	y_train, y_valid, y_test) = train_valid_test_split(X, y, train_size, valid_size)
-	X_train, X_valid, norm_layer = standard_scaler(X_train, X_valid)
-	y_train, y_valid, min_max_scaler = min_max_scaler(y_train, y_valid)
-	return X_train, X_valid, X_test, y_train, y_valid, y_test, norm_layer, min_max_scaler
+	X_train, X_valid, X_test = standard_scaler(X_train, X_valid, X_test)
+	y_train, y_valid, y_test, min_max_transformer = min_max_scaler(y_train, y_valid, y_test)
+	return X_train, X_valid, X_test, y_train, y_valid, y_test, min_max_transformer
 
 
 
