@@ -6,4 +6,4 @@ Training
 Functions
 ---------
 
-.. autofunction:: astroml.train.train_model
+.. autofunction:: astroml.train_model

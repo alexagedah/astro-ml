@@ -6,4 +6,4 @@ Models
 Functions
 ---------
 
-.. autofunction:: astroml.models.get_regression_mlp
+.. autofunction:: astroml.get_regression_mlp

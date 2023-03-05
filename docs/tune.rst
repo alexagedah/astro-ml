@@ -6,6 +6,6 @@ Hyperparameter Tuning
 Functions
 ---------
 
-.. autofunction:: astroml.tune.tune_model
+.. autofunction:: astroml.tune_model
 
-.. autofunction:: astroml.tune.load_tuning_results
+.. autofunction:: astroml.load_tuning_results

@@ -6,4 +6,4 @@ Preprocessing
 Functions
 ---------
 
-.. autofunction:: astroml.structurer
+.. autofunction:: astroml.preprocessor

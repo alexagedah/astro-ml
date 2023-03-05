@@ -6,6 +6,6 @@ Calculate
 Functions
 ---------
 
-.. autofunction:: astroml.calculate.magnetic_energy_density
+.. autofunction:: astroml.magnetic_energy_density
 
-.. autofunction:: astroml.calculate.magnetic_energy
+.. autofunction:: astroml.magnetic_energy
