@@ -12,7 +12,7 @@ from .plot import (
 	)
 
 from .preprocessing import (
-	structurer
+	preprocessor
 	)
 
 from .read import (
