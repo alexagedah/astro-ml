@@ -43,9 +43,6 @@ def evaluate_time_model(model, X_train, X_valid, y_train, y_valid, min_max_scale
     y_valid = min_max_scaler.inverse_transform(y_valid)
     y_train_pred = min_max_scaler.inverse_transform(model.predict(X_train))
     y_valid_pred = min_max_scaler.inverse_transform(model.predict(X_valid))
-    print(y_train)
-    print(y_train.shape)
-    print(y_train_pred.shape)
     training_accuracy = accuracy_score(y_train.round(), y_train_pred.round())
     validation_accuracy = accuracy_score(y_valid.round(), y_valid_pred.round())
     return training_accuracy, validation_accuracy
@@ -107,9 +104,15 @@ def evaluate_model(model, X_train, X_valid, y_train, y_valid, response, min_max_
     min_max_scaler : sklearn.preprocessing.MinMaxScaler
         A fitted transformer for transforming the response
     """
+    print("Mean Squared Error: ")
+    print("Training")
+    print(model.evaluate(X_train, y_train))
+    print("Validation")
+    print(model.evaluate(X_valid, y_valid))
     if response == "time":
         training_accuracy, validation_accuracy = evaluate_time_model(model, X_train, X_valid, y_train, y_valid, min_max_scaler)
     elif response == "chi":
         training_accuracy, validation_accuracy = evaluate_chi_model(model, X_train, X_valid, y_train, y_valid, min_max_scaler)
+    print("Accuracy: ")
     print(f"Training accuracy: {training_accuracy}")
     print(f"Validation accuracy: {validation_accuracy}")
