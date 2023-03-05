@@ -6,4 +6,4 @@ Model Evaluation
 Functions
 ---------
 
-.. autofunction:: astroml.evalute_model
+.. autofunction:: astroml.evaluate_model

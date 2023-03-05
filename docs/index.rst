@@ -13,6 +13,7 @@ Astrophysical Machine Learning is a library that applies machine learning techni
    :caption: Contents:
 
    calculate
+   evaluate
    models
    plot
    preprocessing
