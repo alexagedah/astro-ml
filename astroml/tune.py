@@ -42,13 +42,14 @@ def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, over
 	print()
 	random_search_tuner.results_summary()
 
-def load_optimisation_results(build_model, model_name):
+def load_tuning_results(build_model, model_name):
 	"""
 	Display the results from hyperparameter tuning for a model
 
 	Parameters
 	----------
-	
+	build_model
+	model_name
 	"""
 	random_search_tuner = kt.RandomSearch(
 								build_model,

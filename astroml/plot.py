@@ -1,27 +1,31 @@
 """
-Module for producing graphs
+The plot module contains functions for producing graphs
 """
+# Standard Library
 import pathlib
-
+# 3rd Party
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
 import tensorflow as tf
+
 mpl.rcParams["font.family"] = "Times New Roman"
 plt.style.use("default")
 
-def plot_distribution(variable, variable_name, time = None):
+def plot_distribution(variable, variable_name, time=None):
 	"""
-	Produce a histogram showing the distribution of a variable at a specific
-	time
+	Plot a histogram showing the distribution of a variable at a specific
+	moment in time
 
+	Parameters
+	----------
 	variable : numpy.ndarray
-		4D NumPy array of the variable
+		4D numpy.ndarray represnting the variable
 	variable_name : numpy.ndarray
 		The name of the variable
-	time : int, default =None
-		The time to plot the histogram for (the default is None which results
-		in a plot for the variable across all time)
+	time : int, default=None
+		The time to plot the histogram for. The default is None plots for the
+		variable across all time
 	"""
 	fig = plt.figure()
 	ax = fig.add_subplot(1,1,1)
@@ -35,20 +39,22 @@ def plot_distribution(variable, variable_name, time = None):
 		ax.hist(variable[:,:,:,time].flatten(), bins = 50)
 	plt.show()
 
-def plot_2d_variable(variable, variable_name, time, z = 0):
+def contour_plot(variable, variable_name, time, z=0):
 	"""
 	Produce a contour plot for a variable at a specific time
 
 	Parameters
 	----------
 	variable : numpy.ndarray
-		4D NumPy array of the variable
+		4D numpy.ndarray representing the variable
 	variable_name : numpy.ndarray
 		The name of the variable
 	time : int
 		The time to plot the variable for
 	z : int
-		The z coordinate to plot the variable at
+		The z-coordinate to plot the variable at. The default is 0 which plots
+		the variable in the z = 0 plane. This should be used if the data set is
+		2D.
 	"""
 	Z = variable[:,:,0,time]
 	fig = plt.figure()

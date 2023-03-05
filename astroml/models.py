@@ -1,44 +1,50 @@
 """
-Module for building artificial neural networks
+The models module contains functions for building artificial neural networks.
 """
-# Import libraries
+import keras_tuner as kt
 import numpy as np
 import tensorflow as tf
-import keras_tuner as kt
+
 tf.random.set_seed(42)
 
-def MLP(X_train):
+def get_regression_mlp(input_shape, n_hidden_layers=4, n_hidden_units=256):
 	"""
-	Build a regression multilayer perceptron to predict the time of a snapshot
+	Return a multilayer perceptron for regression
 
 	Parameters
 	----------
-	X_train : numpy.ndarray
-		Design matrix
+	input_shape : array_like
+		The shape of the input
+	n_hidden_layers : int, default=4
+		The number of hidden layers
+	n_hidden_units : int, default=256
+		The number of hidden units
+
 	Returns
 	-------
-	model : tf.keras.Model
+	model : tensorflow.keras.Model
+		The multilayer perceptron for regression
+
 	model_name : str
 		The name of the model. This determines what folder the checkpoints and
-		final model is saved to.
+		final model is saved to. The format for the name of the model is 
+		<grid_size>_<n_hidden_layers>_<n_hidden_units>.
+
 	"""
-	grid_size = X_train.shape[1]
-	model_name = "MLP"
-	model = tf.keras.Sequential([
-		tf.keras.layers.Flatten(input_shape=X_train.shape[1:]),
-		tf.keras.layers.Dense(256, activation="relu"),
-		tf.keras.layers.Dense(256, activation="relu"),
-		tf.keras.layers.Dense(256, activation="relu"),
-		tf.keras.layers.Dense(256, activation="relu"),
-		tf.keras.layers.Dense(1)
-		])
+	model = tf.keras.Sequential()
+	model.add(tf.keras.layers.Input(input_shape))
+	model.add(tf.keras.layers.Flatten())
+	for _ in n_hidden_layers:
+		model.add(tf.keras.layers.Dense(n_hidden_units, activation="relu"))
+	model.add(tf.keras.layers.Dense(1))
 	model.compile(loss="mse",
 	optimizer="adam")
+	model_name = f"{input_shape[0]}_{n_hidden_layers}_{n_hidden_units}"
 	return model, model_name
 
-def hp_regression_mlp(hp):
+def get_hp_regression_mlp(hp):
 	"""
-	Build a regression multilayer perceptron
+	Return a multilayer perceptron for regression with hyperparameters defined
 
 	Parameters
 	----------
@@ -46,7 +52,7 @@ def hp_regression_mlp(hp):
 
 	Returns
 	-------
-	model : tf.keras.Model
+	model : tensorflow.keras.Model
 	"""
 	n_hidden = hp.Int("n_hidden", min_value=4, max_value=16, step=2, sampling="log")
 	n_neurons = hp.Int("n_neurons", min_value=32, max_value=256, step=2, sampling="log")
@@ -57,61 +63,3 @@ def hp_regression_mlp(hp):
 	model.add(tf.keras.layers.Dense(1))
 	model.compile(loss="mse", optimizer="adam")
 	return model
-
-def regression_cnn(X_train):
-	"""
-	Build a regression convolutional neurlal network
-
-	X_train : numpy.ndarray
-		Training design matrix
-	Returns
-	-------
-	model : tf.keras.Model
-	model_name : str
-	"""
-	model_name = "time_2d_regression_cnn"
-	model = tf.keras.Sequential([
-		tf.keras.layers.Conv2D(64, 3, padding="same",activation="relu", input_shape=X_train.shape[1:]),
-		tf.keras.layers.Conv2D(64, 3, padding="same",activation="relu"),
-		tf.keras.layers.MaxPool2D(),
-		tf.keras.layers.Conv2D(128, 3, padding="same",activation="relu"),
-		tf.keras.layers.Conv2D(128, 3, padding="same",activation="relu"),
-		tf.keras.layers.MaxPool2D(),
-		tf.keras.layers.Dense(64, activation="relu"),
-		tf.keras.layers.Dense(1)
-	])
-	model.compile(loss="mse", optimizer="adam")
-	return model, model_name
-
-def MLP_tuner(hp):
-	"""
-	Build a regression convolutional neural network with hyperparameters that can
-	be tuned
-	 
-	Parameters
-	----------
-	hp : keras_tuner.HyperParameters
-
-	Returns
-	-------
-	model : tf.keras.Model
-	"""
-	n_hidden = hp.Int("n_hidden", min_value=1, max_value=8, step=1)
-	filter_size = hp.Int("filter_size", min_value=3, max_value=5, step=2)
-	model = tf.keras.Sequential()
-	for i in range(n_hidden, 0, -1):
-		model.add(tf.keras.layers.Conv2D(512/(2*i), filter_size, padding="same",activation="relu"))
-		model.add(tf.keras.layers.Conv2D(512/(2*i), filter_size, padding="same",activation="relu"))
-		model.add(tf.keras.layers.MaxPool2D())
-	model.add(tf.keras.layers.Flatten())
-	model.add(tf.keras.layers.Dense(64, activation="relu")),
-	model.add(tf.keras.layers.Dense(64, activation="relu")),
-	model.add(tf.keras.layers.Dense(1))
-	model.compile(loss="mse", optimizer="adam")
-	return model
-
-
-
-
-
-

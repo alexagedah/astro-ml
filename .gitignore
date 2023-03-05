@@ -19,3 +19,7 @@ training
 learning_curves
 hp_tuning
 astroml/saved_models
+
+docs/_build/
+docs/_template
+docs/_static

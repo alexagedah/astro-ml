@@ -1,5 +1,55 @@
 """
-Module for reading data from HDF5 files into 4D NumPy arrays
+The read module provides functions for reading data from HDF5 files into 
+numpy.ndarrays.
+There are two formats for storing data in numpy.ndarrays
+
+Data Format One: Exploration
+----------------------------
+Data is stored in multiple numpy.ndarrays array, and each array represents a
+certain variable.
+
+	* The 0th axis represents the x-axis
+	* The 1st axis represents the y-axis
+	* The 2nd axis represents the z-axis
+	* The 4th axis represents the time axis
+
+This format is ideal for data exploration and understanding how different
+quantities for the disc (magnetic field, gas pressure, density, velocity etc...)
+vary over space and time.
+
+Format Two: Supervised Learning
+-------------------------------
+Data is stored in a 5D numpy.array representing a matrix of predictors and a
+1D numpy.array represnting a vector of responses. For the matrix of predictors:
+
+	* The 0th axis specifies the observation. Each observation is a small 
+	  snapshot of a disc at a certain moment in time. The size of the snapshot
+	  can be specified and will effect
+
+		1. The total number of observations (larger snapshots means less
+		observations)
+
+		2. The length of the 1st, 2nd and 3rd axes (larger snapshots increase
+		the size of these axes)
+
+	* The 1st axis represents the x-direction
+	* The 2nd axis represents the y-direction
+	* The 3rd axis represents the z-direction
+	* The 4th axis represents the different variables
+
+		* Variable 0: x-component of the magnetic field
+		* Variable 1: y-component of the magnetic field
+		* Variable 2: z-component of the magnetic field
+		* Variable 3: gas pressure
+		* Variable 4: density
+		* Variable 5: x-component of the fluid velocity
+		* Variable 6: y-component of the fluid velocity
+		* Variable 7: z-component of the fluid velocity
+
+
+For the vector of responses, the 0th axis also specifies the observation.
+
+This format is ideal for supervised learning.
 """
 import os
 import pathlib
@@ -129,16 +179,10 @@ def get_variables_at_snapshot(file_object):
 
 def get_variables(data_relative_path):
 	"""
-	Return the variables in a PLUTO simulation
+	Return 8 4D numpy.ndarrays which each represent a variable.
 
-	This function returns a list of numpy.ndarrays which each contain all the
-	variables in a PLUTO simulation. The data from the PlUTO simulation should
-	be contained in a folder called data in the current working directory.
-	For each array that is returned:
-		The 0th axis represents the x-direction
-		The 1st axis represents the y-direction
-		The 2nd axis represents the z-direction
-		The 3rd axis represents the time
+	This function returns the data in the ideal format for exploration (format
+	one).
 
 	Parameters
 	----------
@@ -148,21 +192,21 @@ def get_variables(data_relative_path):
 	Returns
 	-------
 	B_x : numpy.ndarray
-		4D array with x component of the magnetic field at each cell
+		4D numpy.ndarray representing the x-component of the magnetic field
 	B_y : numpy.ndarray
-		4D array with the y component of the magnetic field at each cell
+		4D numpy.ndarray representing the y-component of the magnetic field
 	B_z : numpy.ndarray
-		4D array with the z component of the magnetic field at each cell
+		4D numpy.ndarray representing the z-component of the magnetic field
 	p : numpy.ndarray
-		4D array with gas pressure at each cell
+		4D numpy.ndarray representing the gas pressure
 	rho : numpy.ndarray
-		4D array with denstiy at each cell
+		4D numpy.ndarray representing the denstiy
 	v_x : numpy.ndarray
-		4D array with x component of the velocity at each cell
+		4D numpy.ndarray representing the x-component of the fluid velocity
 	v_y : numpy.ndarray
-		4D array with y component of the velocity at each cell
+		4D numpy.ndarray representing the y-component of the fluid velocity
 	v_z : numpy.ndarray
-		4D array with z component of the velocity at each cell
+		4D numpy.ndarray representing the z-component of the fluid velocity
 	"""
 	hdf5_files = get_hdf5_files(data_relative_path)
 
@@ -242,7 +286,7 @@ def create_snapshot_array(B_x_t, B_y_t, B_z_t, p_t, rho_t, v_x_t, v_y_t, v_z_t):
 		v_z_t[:,:,:,np.newaxis]], axis = 3)
 	return snapshot_array
 
-def split_snapshot_array(snapshot_array, grid_size = 5, periodic_bc = False):
+def split_snapshot_array(snapshot_array, grid_size):
 	"""
 	Create a NumPy array containing observations of different sections of a
 	simulation
@@ -296,10 +340,12 @@ def split_snapshot_array(snapshot_array, grid_size = 5, periodic_bc = False):
 	X_t = np.concatenate(X_t_list, axis = 0)
 	return X_t
 
-def get_observations(data_relative_path, grid_size=5, response="time"):
+def get_observations_single_sim(data_relative_path, grid_size, response):
 	"""
-	Return a design matrix and a response vector where all observations come
-	from the same simulation
+	Return a predictor matrix and a response vector.
+
+	This function returns a predictor matrix and a resposne vector where each
+	observation comes from the same simulation.
 
 	Parameters
 	----------
@@ -308,22 +354,22 @@ def get_observations(data_relative_path, grid_size=5, response="time"):
 	grid_size : int
 		The size of each grid to consider as an observation
 	response : str, default="Time"
-		The response variable that you are trying to predict. Options are "Time"
-		and "Chi"
+		The response variable that you are trying to predict. Options are "time"
+		and "chi"
 
 	Returns
 	-------
 	X : numpy.ndarray
 		5D array representing the design matrix
-			The 0th axis specifies the observation
-			The 1st axis represents the x-direction
-			The 2nd axis represents the y-direction
-			The 3rd axis represents the z-direction
-			The 4th axis represents the 8 different predictor variables
+			* The 0th axis specifies the observation
+			* The 1st axis represents the x-direction
+			* The 2nd axis represents the y-direction
+			* The 3rd axis represents the z-direction
+			* The 4th axis represents the 8 different predictors
 	y : numpy.ndarray
-		1D array representing the response vector
+		* 1D array representing the response vector
 	"""
-	x_observation_list = []
+	X_observation_list = []
 	y_observation_list = []
 	hdf5_files = get_hdf5_files(data_relative_path)
 	for file_name in hdf5_files:
@@ -334,7 +380,7 @@ def get_observations(data_relative_path, grid_size=5, response="time"):
 		snapshot_array = create_snapshot_array(B_x_t, B_y_t, B_z_t, p_t,
 												rho_t, v_x_t, v_y_t, v_z_t)
 		X_t = split_snapshot_array(snapshot_array, grid_size)
-		x_observation_list.append(X_t)
+		X_observation_list.append(X_t)
 
 		if response == "time":
 			t = int(file_name[5:9])
@@ -343,7 +389,7 @@ def get_observations(data_relative_path, grid_size=5, response="time"):
 			chi = float(data_relative_path.stem + data_relative_path.suffix)
 			y_t = np.full((X_t.shape[0], ), chi)
 		y_observation_list.append(y_t)
-	X = np.concatenate(x_observation_list, axis = 0)
+	X = np.concatenate(X_observation_list, axis = 0)
 	y = np.concatenate(y_observation_list, axis = 0)
 	return X, y
 
@@ -368,7 +414,7 @@ def get_simulation_folders(data_path):
 			simulation_paths.append(data_path / pathlib.Path(folder_name))
 	return simulation_paths
 
-def get_all_observations(data_path, grid_size, response="Time"):
+def get_observations_multiple_sims(data_path, grid_size, response):
 	"""
 	Return design matrix and vector of responses where observations come from
 	all the simulations that are in the specified folder
@@ -380,8 +426,8 @@ def get_all_observations(data_path, grid_size, response="Time"):
 	grid_size : int
 		The size of each grid to consider as an observation
 	response : str, default="Time"
-		The response variable that you are trying to predict. Options are "Time"
-		and "Chi"
+		The response variable that you are trying to predict. Options are "time"
+		and "chi"
 
 	Returns
 	-------
@@ -399,59 +445,65 @@ def get_all_observations(data_path, grid_size, response="Time"):
 	y_list = []
 	simulation_paths = get_simulation_folders(data_path)
 	for path in simulation_paths:
-		X_sim, y_sim = get_observations(path, grid_size, response)
+		X_sim, y_sim = get_observations_single_sim(path, grid_size, response)
 		X_list.append(X_sim)
 		y_list.append(y_sim)
 	X = np.concatenate(X_list, axis = 0)
 	y = np.concatenate(y_list, axis = 0)
 	return X, y
 
-def variables_to_desgin_matrix(T, variables, grid_size = 5, periodic_bc = False):
+def contains_hdf5_files(folder_path):
 	"""
-	Create a design matrix ready for training machine learning models
+	Check if a folder contains HDF5 files.
 
 	Parameters
 	----------
-	T : numpy.ndarray
-		1D array containing all the time coordinates in the simulation
-	variables : list of numpy.ndarray
-		List of 4D numpy.ndarrays, each containing a variable from the simulati
-	grid_size : numpy.ndarray
+	folder_path : pathlib.Path
+		A path to the folder that is to be checked
+	Returns
+	-------
+	bool
+		True if the folder contains HDF5 files, else False
+	"""
+	for file in os.listdir(folder_path):
+		if file.endswith(".h5"):
+			return True
+	return False
+
+def get_observations(data_path, grid_size = 4, response="time"):
+	"""
+	Return a 5D numpy.ndarray representing a matrix of predictors and a 1D
+	numpy.ndarray representing a vector of responses. Each row represnts
+	an observation of a small section of the disc at a moment in time.
+
+	This function returns the data in the ideal format for supervised learning
+	(format two).
+
+	Parameters
+	----------
+	data_path : pathlib.Path
+		This can be one of two things
+			1. A relative path to a folder containing HDF5 files which each 
+			contain data from a single simulation. In this case all
+			observations come from the same simulation
+			2. A relative path to a folder containing multiple folders. Each folder
+			should contain data from a simulation . In this case the observations
+			will come from all of the simulations.
+	grid_size : int
 		The size of each grid to consider as an observation
+	response : str, default="time"
+		The response variable that you are trying to predict. Options are "time"
+		and "chi"
 
 	Returns
 	-------
 	X : numpy.ndarray
-		5D array representing the design matrix
-			The 0th axis specifies the observation
-			The 1st axis represents the x-direction
-			The 2nd axis represents the y-direction
-			The 3rd axis represents the z-direction
-			The 4th axis represents the 8 different predictor variables
+		5D array representing the matrix of predictors
 	y : numpy.ndarray
-		1D array representing the response vector
+		1D array representing the vector of responses
 	"""
-	x_observation_list= []
-	y_observation_list = []
-	for t in T:
-		# Get the values of the variables at each point in time
-		B_x_t = variables[0][:,:,:,t]
-		B_y_t = variables[1][:,:,:,t]
-		B_z_t = variables[2][:,:,:,t]
-		p_t = variables[3][:,:,:,t]
-		rho_t = variables[4][:,:,:,t]
-		v_x_t = variables[5][:,:,:,t]
-		v_y_t = variables[6][:,:,:,t]
-		v_z_t = variables[7][:,:,:,t]
-		snapshot_array = create_snapshot_array(B_x_t, B_y_t, B_z_t, p_t,
-												rho_t, v_x_t, v_y_t, v_z_t)
-		X_t = split_snapshot_array(snapshot_array, grid_size)
-		y_t = np.full((X_t.shape[0], ), t)
-		x_observation_list.append(X_t)
-		y_observation_list.append(y_t)
-	X = np.concatenate(x_observation_list, axis = 0)
-	y = np.concatenate(y_observation_list, axis = 0)
+	if contains_hdf5_files(data_path):
+		X, y = get_observations_single_sim(data_path, grid_size, response)
+	else:
+		X, y = get_observations_multiple_sims(data_path, grid_size, response)
 	return X, y
-
-
-
