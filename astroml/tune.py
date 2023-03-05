@@ -22,7 +22,7 @@ def tune_model(build_model, model_name, X_train, X_valid, y_train, y_valid, over
 	overwrite : bool, default=False
 		If False, reloads an existing project of the same name if one is found. 
 		Otherwise overwrites the project
-	max_trials : int, default=
+	max_trials : int, default=10
 		The total number of trials (model configurations) to test at most
 	"""
 	early_stopping_cb = tf.keras.callbacks.EarlyStopping(patience=5,
@@ -48,8 +48,8 @@ def load_tuning_results(build_model, model_name):
 
 	Parameters
 	----------
-	build_model
-	model_name
+	build_model : function
+	model_name : str
 	"""
 	random_search_tuner = kt.RandomSearch(
 								build_model,
