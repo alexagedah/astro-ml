@@ -4,34 +4,9 @@ format suitable for supervised learning
 """
 # 3rd Party
 import numpy as np
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.validation import check_array, check_is_fitted
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
-
-class NoTransformer(BaseEstimator, TransformerMixin):
-	"""
-	Custom transformer twhich applies 
-	"""
-	def fit(self, X, y = None):
-		X = check_array(X)
-		self.n_features_in_ = X.shape[1]
-		return self
-
-	def transform(self, X):
-		check_is_fitted(self)
-		X = check_array(X)
-		if self.n_features_in_ != X.shape[1]:
-			raise ValueError("Unexpected number of features ")
-		return X
-
-	def inverse_transform(self, X):
-		check_is_fitted(self)
-		X = check_array(X)
-		if self.n_features_in_ != X.shape[1]:
-			raise ValueError("Unexpected number of features")
-		return X
 
 def remove_extra_dimesions(X):
 	"""
@@ -284,15 +259,13 @@ def dumb_preprocessor(X, y, train_size=0.8, valid_size=0.1):
 	y_test : numpy.ndarray
 		1D numpy.ndarray representing the vector of response for the test
 		data set
-	no_transformer
-		scikit-learn transformer which applies no transformation
+	min_max_transformer : sklearn.preprocessing.MinMaxScaler
 	"""
 	X = remove_extra_dimesions(X)
 	(X_train, X_valid, X_test,
 	y_train, y_valid, y_test) = train_valid_test_split(X, y, train_size, valid_size)
-	no_transformer = NoTransformer()
-	no_transformer.fit(y_train)
-	return X_train, X_valid, X_test, y_train, y_valid, y_test, no_transformer
+	y_train, y_valid, y_test, min_max_transformer = min_max_scaler(y_train, y_valid, y_test)
+	return X_train, X_valid, X_test, y_train, y_valid, y_test, min_max_transformer
 
 def physical_preprocessor(X, y, train_size=0.8, valid_size=0.1):
 	"""
@@ -487,8 +460,7 @@ def preprocessor(X, y, preprocessor_type="physical", train_size=0.8, valid_size=
 	y_test : numpy.ndarray
 		1D numpy.ndarray representing the vector of response for the test
 		data set
-	transformer
-		scikit-learn transformer applied to the vector of responses
+	min_max_transformer : sklearn.preprocessing.MinMaxScaler
 	"""
 	if preprocessor_type == "physical":
 		function = physical_preprocessor
@@ -496,11 +468,11 @@ def preprocessor(X, y, preprocessor_type="physical", train_size=0.8, valid_size=
 		function = standard_preprocessor
 	elif preprocessor_type == "dumb":
 		function = dumb_preprocessor
-	X_train, X_valid, X_test, y_train, y_valid, y_test, transformer = function(X,
+	X_train, X_valid, X_test, y_train, y_valid, y_test, min_max_transformer = function(X,
 		y.reshape(-1,1),
 		train_size,
 		valid_size)
-	return X_train, X_valid, X_test, y_train, y_valid, y_test, transformer
+	return X_train, X_valid, X_test, y_train, y_valid, y_test, min_max_transformer
 
 
 
