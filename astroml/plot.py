@@ -64,6 +64,7 @@ def contour_plot(variable, variable_name, time, z=0):
 	ax.set_ylabel("Y")
 	CS = ax.contour(X[:], Y[:],Z[:]) 
 	ax.clabel(CS, inline=True, fontsize=5)
+	ax.grid(True)
 	plt.show()
 
 def plot_learning_curve(history, model_name):
