@@ -68,7 +68,8 @@ def contour_plot(variable, variable_name, time, z=0):
 
 def plot_learning_curve(history, model_name):
 	"""
-	Plot the learning curve of a artificial neural network
+	Plot the learning curve for a artificial neural network during training and
+	save the file to the learning_curves folder
 
 	Parameters
 	----------
