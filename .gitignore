@@ -10,8 +10,7 @@ __pycache__/
 
 trainer.py
 tuner.py
-chi_tester.py
-time_tester.py
+evaluator.py
 exploration.py
 
 # Model fitting
