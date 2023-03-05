@@ -483,12 +483,15 @@ def get_observations(data_path, grid_size = 4, response="time"):
 	----------
 	data_path : pathlib.Path
 		This can be one of two things
+		
 			1. A relative path to a folder containing HDF5 files which each 
 			contain data from a single simulation. In this case all
 			observations come from the same simulation
+
 			2. A relative path to a folder containing multiple folders. Each folder
 			should contain data from a simulation . In this case the observations
 			will come from all of the simulations.
+		
 	grid_size : int
 		The size of each grid to consider as an observation
 	response : str, default="time"
