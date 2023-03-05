@@ -34,14 +34,17 @@ def get_regression_mlp(X_train, response, n_hidden_layers=4, n_hidden_units=256)
 
 	"""
 	model = tf.keras.Sequential()
+	input_shape = X_train.shape[1:]
 	model.add(tf.keras.layers.Input(X_train.shape[1:]))
+	norm_layer = tf.keras.layers.Normalization()
+	model.add(norm_layer)
 	model.add(tf.keras.layers.Flatten())
-	model.add(tf.keras.layers.Normalization().adapt(X_train))
-	for _ in n_hidden_layers:
+	for _ in range(n_hidden_layers):
 		model.add(tf.keras.layers.Dense(n_hidden_units, activation="relu"))
 	model.add(tf.keras.layers.Dense(1))
 	model.compile(loss="mse",
 	optimizer="adam")
+	norm_layer.adapt(X_train)
 	model_name = f"{input_shape[0]}_{n_hidden_layers}_{n_hidden_units}_{response}"
 	return model, model_name
 

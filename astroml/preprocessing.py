@@ -1,5 +1,5 @@
 """
-The structuring module contains functions for preparing data so that it is in a
+The preprocessing module contains functions for preprocessing data so that it is in a
 format suitable for supervised learning
 """
 # 3rd Party
@@ -76,9 +76,9 @@ def train_valid_test_split(X, y, train_size=0.8, valid_size=0.1):
 					random_state = 42)
 	return X_train, X_valid, X_test, y_train, y_valid, y_test
 
-def preprocessor(X, y, train_size=0.8, valid_size=0.1):
+def structurer(X, y, train_size=0.8, valid_size=0.1):
 	"""
-	Preprocess the data so it is ready for machine learning
+	Structure the data so it is ready for machine learning
 
 	This function removes extra dimesnions from the matrix of predictors if the
 	simulation is 2D. It then splits the data set into training, validation and
@@ -132,8 +132,3 @@ def preprocessor(X, y, train_size=0.8, valid_size=0.1):
 	(X_train, X_valid, X_test,
 	y_train, y_valid, y_test) = train_valid_test_split(X, y, train_size, valid_size)
 	return X_train, X_valid, X_test, y_train, y_valid, y_test
-
-
-
-
-
