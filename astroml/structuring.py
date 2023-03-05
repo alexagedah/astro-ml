@@ -1,6 +1,6 @@
 """
-The preparation module containing functions for preparing data before it is
-passed to a machine learning algorithm.
+The structuring module contains functions for preparing data so that it is in a
+format suitable for supervised learning
 """
 # 3rd Party
 import numpy as np
@@ -76,7 +76,7 @@ def train_valid_test_split(X, y, train_size=0.8, valid_size=0.1):
 					random_state = 42)
 	return X_train, X_valid, X_test, y_train, y_valid, y_test
 
-def preparer(X, y, train_size=0.8, valid_size=0.1):
+def preprocessor(X, y, train_size=0.8, valid_size=0.1):
 	"""
 	Preprocess the data so it is ready for machine learning
 
