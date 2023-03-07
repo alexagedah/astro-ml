@@ -87,9 +87,9 @@ def evaluate_model(model, X_train, X_valid, y_train_scaled, y_valid_scaled, resp
         A fitted transformer for transforming the response
     """
     print("Mean Squared Error: ")
-    print("Training")
+    print("Training: ")
     print(model.evaluate(X_train, y_train_scaled))
-    print("Validation")
+    print("Validation: ")
     print(model.evaluate(X_valid, y_valid_scaled))
     y_train = min_max_scaler.inverse_transform(y_train_scaled)
     y_valid = min_max_scaler.inverse_transform(y_valid_scaled)
@@ -101,6 +101,6 @@ def evaluate_model(model, X_train, X_valid, y_train_scaled, y_valid_scaled, resp
     elif response == "chi":
         training_accuracy = chi_accuracy(y_train, y_train_pred)
         validation_accuracy = chi_accuracy(y_valid, y_valid_pred)
-    print("Accuracy: ")
+    print("\nAccuracy: ")
     print(f"Training accuracy: {training_accuracy}")
     print(f"Validation accuracy: {validation_accuracy}")

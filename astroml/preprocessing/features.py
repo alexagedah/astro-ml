@@ -51,8 +51,7 @@ def add_feature(X, new_feature):
 
 def add_magnetic_field_magnitude(X):
     """
-    Add the magnitude of the magnetic field to the matrix of predictors and normalise
-    the x, y and z components of the velocity
+    Add the magnitude of the magnetic field to the matrix of predictors
 
     Parameters
     ----------
@@ -67,14 +66,11 @@ def add_magnetic_field_magnitude(X):
     """
     B = np.sqrt(X[:,:,:,:,B_x_INDEX]**2 + X[:,:,:,:,B_y_INDEX]**2 + X[:,:,:,:,B_z_INDEX]**2)
     X_with_B = add_feature(X, B)
-    X_transformed = normalisation.component_normaliser(X_with_B,
-        [B_x_INDEX, B_y_INDEX, B_z_INDEX], B_INDEX)
-    return X_transformed
+    return X_with_B
 
 def add_speed(X):
     """
-    Add the speed of the fluid to the matrix of predictors and normalise the
-    x, y and z components of the velocity
+    Add the speed of the fluid to the matrix of predictors
 
     Parameters
     ----------
@@ -89,9 +85,7 @@ def add_speed(X):
     """
     speed = np.sqrt(X[:,:,:,:,v_x_INDEX]**2 + X[:,:,:,:,v_y_INDEX]**2 + X[:,:,:,:,v_z_INDEX]**2)
     X_with_speed = add_feature(X, speed)
-    X_transformed = normalisation.component_normaliser(X_with_speed,
-        [v_x_INDEX, v_y_INDEX, v_z_INDEX], v_INDEX)
-    return X_transformed
+    return X_with_speed
 
 def add_plasma_beta(X):
     """

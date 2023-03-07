@@ -7,6 +7,10 @@ from .evaluate import (
 	evaluate_model
 	)
 
+from .importance import (
+	feature_importance
+	)
+
 from .models import (
 	get_regression_mlp,
 	)

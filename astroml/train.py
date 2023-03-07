@@ -2,8 +2,9 @@
 The train model contains functions for training artificial neural networks
 """
 # Standard Libary
-import pathlib
 import os
+import pathlib
+import shutil
 # 3rd Party
 import tensorflow as tf
 # Libary Specific
@@ -51,7 +52,26 @@ def train_model(model, model_name, X_train, X_valid, y_train, y_valid, epochs=10
 								validation_data=(X_valid, y_valid),
 								callbacks = [checkpoint_cb, early_stopping_cb])
 	model.save(f"astroml/saved_models/{model_name}")
+	clear_folder("training")
 	plot.plot_learning_curve(history, model_name)
 	return model
 
+def clear_folder(folder):
+	"""
+	Clear everything in a folder
+
+	Parameters
+	----------
+	folder : str
+		The name of the folder to clear
+	"""
+	for filename in os.listdir(folder):
+	    file_path = os.path.join(folder, filename)
+	    try:
+	        if os.path.isfile(file_path) or os.path.islink(file_path):
+	            os.unlink(file_path)
+	        elif os.path.isdir(file_path):
+	            shutil.rmtree(file_path)
+	    except Exception as e:
+	        print('Failed to delete %s. Reason: %s' % (file_path, e))
 
