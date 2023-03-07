@@ -16,6 +16,7 @@ exploration.py
 # Model fitting
 data
 training
+importance
 learning_curves
 hp_tuning
 astroml/saved_models
