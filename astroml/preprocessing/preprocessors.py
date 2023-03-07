@@ -1,7 +1,8 @@
 """
-The preprocessing module contains functions for preprocessing data so that it is in a
-format suitable for supervised learning
+The preprocessors module contains functions for preprocessing data so that it is
+in a format suitable for supervised learning
 """
+
 # 3rd Party
 import numpy as np
 import tensorflow as tf
@@ -15,7 +16,7 @@ def simple_preprocessor(X, y, train_size, valid_size, _=None):
 	Preprocessing steps
 
 		#. Remove extra dimensions from the matrix of predictors if the
-		simulation is 2D
+		   simulation is 2D
 		#. Split the data set into training, validation and test data sets
 		#. Apply min-max scaling to the response so that it is between -1 and 1
 
@@ -71,7 +72,7 @@ def standard_preprocessor(X, y, train_size, valid_size, features_list=[]):
 
 		#. Add additional features
 		#. Remove extra dimensions from the matrix of predictors if the
-		simulation is 2D
+		   simulation is 2D
 		#. Split the data set into training, validation and test data sets
 		#. Apply standard scaling to the predictors
 		#. Apply min-max scaling to the response so that it is between -1 and 1
