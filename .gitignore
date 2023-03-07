@@ -18,6 +18,7 @@ data
 training
 importance
 learning_curves
+results
 hp_tuning
 astroml/saved_models
 

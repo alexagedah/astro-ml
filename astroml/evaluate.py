@@ -6,6 +6,7 @@ import pathlib
 import os
 # 3rd Party
 import numpy as np
+import pandas as pd
 from sklearn.metrics import accuracy_score
 import tensorflow as tf
 # Libary Specific
@@ -61,7 +62,7 @@ def chi_accuracy(y, y_pred):
     accuracy = accuracy_score(y, y_pred)
     return accuracy
 
-def evaluate_model(model, X_train, X_valid, y_train_scaled, y_valid_scaled, response, min_max_scaler):
+def evaluate_model(model, model_name, X_train, X_valid, y_train_scaled, y_valid_scaled, response, min_max_scaler):
     """
     Evaluate the accuracy of the model on the training data and validation data
 
@@ -69,6 +70,8 @@ def evaluate_model(model, X_train, X_valid, y_train_scaled, y_valid_scaled, resp
     ----------
     model : tf.keras.Models
         The model to evaluate
+    model_name : str
+        The name of the model to evaluate
     X_train : numpy.ndarray
         numpy.ndarray representing the matrix of predictors for the training
         data set
@@ -82,15 +85,18 @@ def evaluate_model(model, X_train, X_valid, y_train_scaled, y_valid_scaled, resp
         numpy.ndarray representing the vector of responses for the validation
         data set
     response : str
-        The name of the response variable. Options are “time” and “chi”
+        The name of the response variable. options are “time” and “chi”
     min_max_scaler : sklearn.preprocessing.MinMaxScaler
         A fitted transformer for transforming the response
+
+    Returns
+    -------
+    results : pandas.Series
+        Series with the training and validation mean squared error and accuracy
+        for the model
     """
-    print("Mean Squared Error: ")
-    print("Training: ")
-    print(model.evaluate(X_train, y_train_scaled))
-    print("Validation: ")
-    print(model.evaluate(X_valid, y_valid_scaled))
+    training_mse = model.evaluate(X_train, y_train_scaled)
+    validation_mse = model.evaluate(X_valid, y_valid_scaled)
     y_train = min_max_scaler.inverse_transform(y_train_scaled)
     y_valid = min_max_scaler.inverse_transform(y_valid_scaled)
     y_train_pred = min_max_scaler.inverse_transform(model.predict(X_train))
@@ -101,6 +107,12 @@ def evaluate_model(model, X_train, X_valid, y_train_scaled, y_valid_scaled, resp
     elif response == "chi":
         training_accuracy = chi_accuracy(y_train, y_train_pred)
         validation_accuracy = chi_accuracy(y_valid, y_valid_pred)
-    print("\nAccuracy: ")
-    print(f"Training accuracy: {training_accuracy}")
-    print(f"Validation accuracy: {validation_accuracy}")
+    results = pd.Series({
+    "Training MSE":training_mse,
+    "Validation MSE":validation_mse,
+    "Training Accuracy":training_accuracy,
+    "Validation Accuracy":validation_accuracy}, name="Results")
+    results.to_csv(f"results/{model_name}")
+    return results
+
+
