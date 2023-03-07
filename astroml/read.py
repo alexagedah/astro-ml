@@ -386,7 +386,7 @@ def get_observations_single_sim(data_relative_path, grid_size, response):
 			t = int(file_name[5:9])
 			y_t = np.full((X_t.shape[0], ), t)
 		elif response == "chi":
-			chi = float(data_relative_path.stem + data_relative_path.suffix)
+			chi = float(data_relative_path.stem.replace("dot","."))
 			y_t = np.full((X_t.shape[0], ), chi)
 		y_observation_list.append(y_t)
 	X = np.concatenate(X_observation_list, axis = 0)
