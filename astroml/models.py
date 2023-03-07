@@ -7,7 +7,7 @@ import tensorflow as tf
 
 tf.random.set_seed(42)
 
-def get_regression_mlp(input_shape, preprocessor_type, response, n_hidden_layers=4, n_hidden_units=256):
+def get_regression_mlp(input_shape, preprocessor_type, feature_list, response, n_hidden_layers=4, n_hidden_units=256):
 	"""
 	Return a multilayer perceptron for regression
 
@@ -16,7 +16,9 @@ def get_regression_mlp(input_shape, preprocessor_type, response, n_hidden_layers
 	input_shape : int
 		The shape of the inputs
 	preprocessor_type : str
-		The type of preprocessor to use. Options are "physical","standard","dumb".
+		The type of preprocessor to use. Options are "simple","standard","smart".
+	feature_list : list of str
+		A list of the additional features that have been used
 	response : str
 		The name of the response variable 
 	n_hidden_layers : int, default=4
@@ -42,7 +44,8 @@ def get_regression_mlp(input_shape, preprocessor_type, response, n_hidden_layers
 	model.add(tf.keras.layers.Dense(1))
 	model.compile(loss="mse",
 	optimizer="adam")
-	model_name = f"{input_shape[0]}_{preprocessor_type}_{n_hidden_layers}_{n_hidden_units}_{response}"
+	features = '-'.join(feature_list)
+	model_name = f"{input_shape[0]}_{preprocessor_type}_{features}_{n_hidden_layers}_{n_hidden_units}_{response}"
 	return model, model_name
 
 def get_hp_regression_mlp(hp):
