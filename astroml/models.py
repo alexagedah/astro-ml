@@ -7,34 +7,34 @@ import tensorflow as tf
 
 tf.random.set_seed(42)
 
-def get_regression_mlp(input_shape, preprocessor_type, feature_list, response, n_hidden_layers=4, n_hidden_units=256):
+def get_regression_mlp(data_set_name, input_shape, apply_standard_scaling, feature_list, n_hidden_layers, n_hidden_units, response):
 	"""
 	Return a multilayer perceptron for regression
 
 	Parameters
 	----------
+	data_set_name : str
+		The name of the data set
 	input_shape : int
 		The shape of the inputs
-	preprocessor_type : str
+	apply_standard_scaling : str
 		The type of preprocessor to use. Options are "simple","standard","smart".
 	feature_list : list of str
 		A list of the additional features that have been used
-	response : str
-		The name of the response variable 
 	n_hidden_layers : int, default=4
 		The number of hidden layers
 	n_hidden_units : int, default=256
 		The number of hidden units
+	response : str
+		The name of the response variable 
 
 	Returns
 	-------
 	model : tensorflow.keras.Model
 		The multilayer perceptron for regression
 	model_name : str
-		The name of the model. This determines what folder the checkpoints and
-		final model is saved to. The format for the name of the model is 
-		<grid_size>_<n_hidden_layers>_<n_hidden_units>_<response>
-
+		The name of the model. The format for the name of the model is 
+		<data_set_name>_<grid_size>_{apply_standard_scaling}_<n_hidden_layers>_<n_hidden_units>_<response>
 	"""
 	model = tf.keras.Sequential()
 	model.add(tf.keras.layers.Input(input_shape))
@@ -44,9 +44,40 @@ def get_regression_mlp(input_shape, preprocessor_type, feature_list, response, n
 	model.add(tf.keras.layers.Dense(1))
 	model.compile(loss="mse",
 	optimizer="adam")
-	features = '-'.join(feature_list)
-	model_name = f"{input_shape[0]}_{preprocessor_type}_{features}_{n_hidden_layers}_{n_hidden_units}_{response}"
+	model_name = get_model_name(data_set_name, input_shape, apply_standard_scaling, feature_list, n_hidden_layers, n_hidden_units, response)
 	return model, model_name
+
+def get_model_name(data_set_name, input_shape, apply_standard_scaling, feature_list, n_hidden_layers, n_hidden_units, response):
+	"""
+	Return the name of a model
+
+	Parameters
+	----------
+	data_set_name : str
+		The name of the data set
+	input_shape : int
+		The shape of the inputs
+	apply_standard_scaling : str
+		Whether standard scaling was applied to the predictors
+	feature_list : list of str
+		A list of the additional features that have been created
+	n_hidden_layers : int, default=4
+		The number of hidden layers
+	n_hidden_units : int, default=256
+		The number of hidden units
+	response : str
+		The name of the response variable 
+
+	Returns
+	-------
+	model_name : str
+		The name of the model. The format for the name of the model is 
+		<data_set_name>_<grid_size>_{apply_standard_scaling}_<n_hidden_layers>_<n_hidden_units>_<response>
+	"""
+	grid_size = input_shape[0]
+	features = '-'.join(feature_list)
+	model_name = f"{data_set_name}_{grid_size}_{apply_standard_scaling}_{features}_{n_hidden_layers}_{n_hidden_units}_{response}"
+	return model_name
 
 def get_hp_regression_mlp(hp):
 	"""

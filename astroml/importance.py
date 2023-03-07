@@ -31,7 +31,7 @@ def shuffle_feature(X, feature_index):
         np.random.shuffle(X_shuffled[:,:,:,:,feature_index])
     return X_shuffled
 
-def feature_importance(model, model_name, X_valid, y_valid):
+def feature_importance(model, model_name, feature_map, X_valid, y_valid):
     """
     Return a DataFrame with importance of each feature
 
@@ -41,6 +41,9 @@ def feature_importance(model, model_name, X_valid, y_valid):
         The model to do feature importance for
     model_name : str
         The name of the model
+    feature_map : dictionary of {int:str}
+        Dictionary indicating which features are at which index in the matrix of
+        predictors
     X_valid : numpy.ndarray
         4D or 5D numpy.ndarray representing the matrix of features for the
         validation data set
@@ -56,8 +59,8 @@ def feature_importance(model, model_name, X_valid, y_valid):
         in the mean squared error.
     """
     data = []
-    for feature in range(X_valid.shape[-1]):
-        X_valid_shuffled = shuffle_feature(X_valid, feature)
+    for feature_index, feature in feature_map.items():
+        X_valid_shuffled = shuffle_feature(X_valid, feature_index)
         shuffled_mse = model.evaluate(X_valid_shuffled, y_valid)
         feature_df = pd.Series(shuffled_mse,
             index = [feature],
