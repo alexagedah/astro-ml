@@ -3,7 +3,7 @@ The read module provides functions for reading data from HDF5 files into
 numpy.ndarrays.
 There are two formats for storing data in numpy.ndarrays
 
-Data Format One: Exploration
+Data Format One: Data Exploration
 ----------------------------
 Data is stored in multiple numpy.ndarrays array, and each array represents a
 certain variable.
@@ -191,22 +191,10 @@ def get_variables(data_relative_path):
 
 	Returns
 	-------
-	B_x : numpy.ndarray
-		4D numpy.ndarray representing the x-component of the magnetic field
-	B_y : numpy.ndarray
-		4D numpy.ndarray representing the y-component of the magnetic field
-	B_z : numpy.ndarray
-		4D numpy.ndarray representing the z-component of the magnetic field
-	p : numpy.ndarray
-		4D numpy.ndarray representing the gas pressure
-	rho : numpy.ndarray
-		4D numpy.ndarray representing the denstiy
-	v_x : numpy.ndarray
-		4D numpy.ndarray representing the x-component of the fluid velocity
-	v_y : numpy.ndarray
-		4D numpy.ndarray representing the y-component of the fluid velocity
-	v_z : numpy.ndarray
-		4D numpy.ndarray representing the z-component of the fluid velocity
+	variables : dict of {str: numpy.ndarray}
+		Dictionary where each string specifies the variable and each value is
+		a 4D numpy.ndarray representing the variable. The keys in the dictionary
+		are B_x, B_y, B_z, p, rho, v_x, v_y and v_z
 	"""
 	hdf5_files = get_hdf5_files(data_relative_path)
 
@@ -241,7 +229,17 @@ def get_variables(data_relative_path):
 	v_x = np.concatenate(v_x_list, axis = 3)
 	v_y = np.concatenate(v_y_list, axis = 3)
 	v_z = np.concatenate(v_z_list, axis = 3)
-	return B_x, B_y, B_z, p, rho, v_x, v_y, v_z
+	variables = {
+	"B_x":B_x,
+	"B_y":B_y,
+	"B_z":B_z,
+	"p":p,
+	"rho":rho,
+	"v_x":v_x,
+	"v_y":v_y,
+	"v_z":v_z
+	}
+	return variables
 
 def create_snapshot_array(B_x_t, B_y_t, B_z_t, p_t, rho_t, v_x_t, v_y_t, v_z_t):
 	"""
