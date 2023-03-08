@@ -6,55 +6,122 @@ import pathlib
 # 3rd Party
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-import tensorflow as tf
 
 mpl.rcParams["font.family"] = "Times New Roman"
 plt.style.use("default")
 
-def plot_distribution(variable, variable_name, time=None):
+def save_show_figure(figure, save_figure, filename=None, show_figure=False):
 	"""
-	Plot a histogram showing the distribution of a variable at a specific
-	moment in time
+	Save and/or show a figure
 
 	Parameters
 	----------
+	figure : matplotlib.figure
+		The figure to save or show
+	save_figure : bool, default=False
+		Whether to save the figure
+	filename : str, default=None
+		The name of the file to save the figure to. The default is None for
+		cases where you don't want to save the figure
+	show_figure : bool, default=False
+		Whether to show the figure
+	"""
+	if save_figure:
+		figure.savefig(filename)
+	if show_figure:
+		plt.show()
+
+def plot_single_distribution(data_set, variable, variable_name, time=None, save_fig=True, show_fig=False):
+	"""
+	Plot a histogram showing the distribution of a variable at a specific moment 
+	in time
+
+	Parameters
+	----------
+	data_set : str
+		A relative path to the data set to produce histograms for
 	variable : numpy.ndarray
 		4D numpy.ndarray represnting the variable
 	variable_name : numpy.ndarray
 		The name of the variable
 	time : int, default=None
-		The time to plot the histogram for. The default is None plots for the
+		The time to plot the histogram for. The default None plots for the
 		variable across all time
+	save_fig : bool, default=True
+		Whether to save the figure
+	show_fig : bool, default=False
+		Whether to show the figure
 	"""
 	fig = plt.figure()
 	ax = fig.add_subplot(1,1,1)
 	ax.set_xlabel(variable_name)
 	ax.set_ylabel("Frequency")
 	if time == None:
-		ax.set_title(f"Distribution of the {variable_name} of the Disc For All Times")
+		ax.set_title(f"The Distribution of {variable_name}")
 		ax.hist(variable.flatten(), bins = 50)
 	else:
-		ax.set_title(f"Distribution of the {variable_name} of the Disc at Time t = {time}")
+		ax.set_title(f"The Distribution of the {variable_name} at time = {time}")
 		ax.hist(variable[:,:,:,time].flatten(), bins = 50)
-	plt.show()
+	filename = f"exploration/{data_set}/{variable_name}_distribution"
+	save_show_figure(fig, save_fig, filename, show_fig)
 
-def contour_plot(variable, variable_name, time, z=0):
+def plot_distributions(data_set, variable, variable_name, save_fig=True, show_fig=False):
+	"""
+	Plot the distribution of a variable at a specific time
+
+	Parameters
+	----------
+	data_set : str
+		A relative path to the data set to produce histograms for
+	variable : numpy.ndarray
+		4D numpy.ndarray representing the variable in the simulation
+	variable_name : numpy.ndarray
+		The name of the variabele
+	save_fig : bool, default=True
+		Whether to save the figure
+	show_fig : bool, default=False
+		Whether to show the figure
+	"""
+	times = np.linspace(0, variable.shape[-1]-1, 9).astype(np.int64)
+	array = variable.reshape(-1, variable.shape[-1])[:,times]
+	mpl.rc('xtick', labelsize=4) 
+	mpl.rc('ytick', labelsize=4) 
+	fig, axes = plt.subplots(3,3, figsize=(16,10))
+	for i in range(3):
+		for j in range(3):
+			time = times[i*3+j]
+			axes[i,j].hist(array[:,i*3+j], bins = 100)
+			axes[i,j].set_title(f"The Distribution of {variable_name} at time = {time}", {'fontsize':10})
+			axes[i,j].set_xlabel("B_x", {'fontsize': 4})
+			axes[i,j].set_ylabel("Frequency", {'fontsize': 4})
+	filename = f"exploration/{data_set}/{variable_name}_distribution"
+	save_show_figure(fig, save_fig, filename, show_fig)
+
+def contour_plot(data_set, variable, z, variable_name, time=None, save_fig=True, show_fig=False):
 	"""
 	Produce a contour plot for a variable at a specific time
 
 	Parameters
 	----------
+	data_set : str
+		A relative path to the data set to produce histograms for
 	variable : numpy.ndarray
-		4D numpy.ndarray representing the variable
-	variable_name : numpy.ndarray
-		The name of the variable
-	time : int
-		The time to plot the variable for
+		4D numpy.ndarray represnting the variable
 	z : int
 		The z-coordinate to plot the variable at. The default is 0 which plots
 		the variable in the z = 0 plane. This should be used if the data set is
 		2D.
+	variable_name : numpy.ndarray
+		The name of the variable
+	time : int, default=None
+		The time to plot the histogram for. The default None plots for the
+		variable across all time
+	save_fig : bool, default=True
+		Whether to save the figure
+	show_fig : bool, default=False
+		Whether to show the figure
 	"""
 	Z = variable[:,:,0,time]
 	fig = plt.figure()
@@ -65,7 +132,8 @@ def contour_plot(variable, variable_name, time, z=0):
 	CS = ax.contour(X[:], Y[:],Z[:]) 
 	ax.clabel(CS, inline=True, fontsize=5)
 	ax.grid(True)
-	plt.show()
+	filename = f"exploration/{data_set}/{variable_name}_distribution"
+	save_show_figure(fig, save_fig, filename, show_fig)
 
 def plot_learning_curve(history, model_name, show=False):
 	"""
@@ -96,3 +164,6 @@ def plot_learning_curve(history, model_name, show=False):
 		plt.show()
 	save_path = pathlib.Path("learning_curves") / pathlib.Path(model_name)
 	fig.savefig(save_path)
+
+
+

@@ -6,6 +6,8 @@ Plotting
 Functions
 ---------
 
-.. autofunction:: astroml.plot_distribution
+.. autofunction:: astroml.plot_single_distribution
+
+.. autofunction:: astroml.plot_distributions
 
 .. autofunction:: astroml.contour_plot

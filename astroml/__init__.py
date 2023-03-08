@@ -16,8 +16,9 @@ from .models import (
 	)
 
 from .plot import (
-	contour_plot,
-	plot_distribution
+	plot_single_distribution,
+	plot_distributions,
+	contour_plot
 	)
 
 from .preprocessing import (
