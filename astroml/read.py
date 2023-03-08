@@ -94,14 +94,12 @@ def get_time_coordinates(data_relative_path):
 
 	Returns
 	-------
-	times : dict of {str:numpy.ndarray}
-		times = {"T":1D numpy.ndarray}. The value is a 1D numpy.ndarray
-		containing all the time coordinates in the simulation
+	t : numpy.ndarray
+		1D numpy.ndarray representing the time coordinates
 	"""
 	hdf5_files = get_hdf5_files(data_relative_path)
-	T = np.array(range(len(hdf5_files)))
-	times = {"T":T}
-	return times
+	t = np.array(range(len(hdf5_files)))
+	return t
 
 def get_cell_coordinates(data_relative_path):
 	"""
@@ -125,22 +123,23 @@ def get_cell_coordinates(data_relative_path):
 
 	Returns
 	-------
-	coordinates_dict : dict of {str:numpy.ndarray}
-		Dictionary where each key specifies the axis and the values are 3D
-		numpy.ndarrays representing the coordiantes for that axis
+	x : numpy.ndarray
+		3D numpy.ndarray representing the x-coordiantes
+	y : numpy.ndarray
+		3D numpy.ndarray representing the y-coordiantes
+	z : numpy.ndarray
+		3D numpy.ndarray representing the z-coordiantes
 	"""
 	file_path = data_relative_path / pathlib.Path("data.0000.flt.h5")
 	file_object = h5py.File(file_path, "r")
 	cell_coords_group = file_object["cell_coords"]
-	X = cell_coords_group["X"][:]
-	Y = cell_coords_group["Y"][:]
-	Z = cell_coords_group["Z"][:]
-	if X.ndim == 2:
-		coordinates = (X[:,:,np.newaxis], Y[:,:,np.newaxis], Z[:,:,np.newaxis])
+	x = cell_coords_group["X"][:]
+	y = cell_coords_group["Y"][:]
+	z = cell_coords_group["Z"][:]
+	if x.ndim == 2:
+		return x[:,:,np.newaxis], y[:,:,np.newaxis], z[:,:,np.newaxis]
 	else:
-		coordinates = (X, Y, Z)
-	coordinates_dict = dict(zip(("X","Y","Z"),coordinates))
-	return coordinates_dict
+		return x, y, z
 
 def get_variables_at_snapshot(file_object):
 	"""
@@ -256,309 +255,7 @@ def get_fluid_variables(data_relative_path):
 	}
 	return fluid_variables
 
-def get_variables(data_relative_path):
-	"""
-	Return a dictionary with all the relevant variables for a simulation
-
-	Parameters
-	----------
-	data_relative_path : pathlib.Path
-		A relative path to the folder containing the simulation data
-
-	Returns
-	-------
-	variables : dict of {str:numpy.ndarray, str: dict of {str:numpy.ndarray} }
-		The keys in the dictionary are "T","X","Y","Z" and "Fluid Variables".
-
-			* For "T", the corresponding value is a 1D numpy.ndarray which
-			  describes the time coordinate in the simulation
-			* For "X","Y" and "Z", the corresponding value is a 3D numpy.ndarray
-			  which desribes the spacial coordinate in the simulation.
-			* For "Fluid Variables", the correspond value is a dictionary. The
-			  keys for this dictionary are "B_x", "B_y", "B_z", "p", "rho", "v_x",
-			  "v_y" and "v_z". THe corresponding value is a 4D numpy.ndarray
-			  which describes the fluid variable at different points in space
-			  and time.
 
 
-	See Also
-	--------
-	get_time_coordinates
-	get_cell_coordinates
-	get_fluid_variables
-	"""
-	times = get_time_coordinates(data_relative_path)
-	coordinates = get_cell_coordinates(data_relative_path)
-	fluid_variables = get_fluid_variables(data_relative_path)
-	variables = times.copy()
-	variables.update(coordinates)
-	variables.update({"Fluid Variables":fluid_variables})
-	return variables
 
-def create_snapshot_array(B_x_t, B_y_t, B_z_t, p_t, rho_t, v_x_t, v_y_t, v_z_t):
-	"""
-	Create a 4D NumPy array containing information on all the variables at a
-	certain moment in time
 
-	Parameters
-	----------
-	B_x_t : numpy.ndarray
-		3D array containing the x component of the magnetic field at each cell
-	B_y_t : numpy.ndarray
-		3D array containing the y component of the magnetic field at each cell
-	B_z_t : numpy.ndarray
-		3D array containing the z component of the magnetic field at each cell
-	p_t : numpy.ndarray
-		3D array containing the pressure at each cell
-	rho_t : numpy.ndarray
-		3D array containing the density at each cell
-	v_x_t : numpy.ndarray
-		3D array containing the x component of the velocity at each cell
-	v_y_t : numpy.ndarray
-		3D array containing the y component of the velocity at each cell
-	v_z_t : numpy.ndarray
-		3D array containing the y component of the velocity at each cell
-
-	Returns
-	-------
-	snapshot_array : numpy.ndarray
-		4D array containing all the variables at a certain moment in time
-		The 0th axis represents the x-direction
-		The 1st axis represents the y-direction
-		The 2nd axis represents the z-direction
-		The 3rd axis specifies the 8 different variables
-	"""
-	snapshot_array = np.concatenate([B_x_t[:,:,:,np.newaxis],
-		B_y_t[:,:,:,np.newaxis],
-		B_z_t[:,:,:,np.newaxis],
-		p_t[:,:,:,np.newaxis],
-		rho_t[:,:,:,np.newaxis],
-		v_x_t[:,:,:,np.newaxis],
-		v_y_t[:,:,:,np.newaxis],
-		v_z_t[:,:,:,np.newaxis]], axis = 3)
-	return snapshot_array
-
-def split_snapshot_array(snapshot_array, grid_size):
-	"""
-	Create a NumPy array containing observations of different sections of a
-	simulation
-
-	Parameters
-	----------
-	snapshot_array : numpy.ndarray
-		4D array containing all the variables at a certain moment in time
-	grid_size : int
-		The size of each grid to consider as an observation
-	Returns
-	-------
-	X_t : numpy.ndarray
-		5D array containing observations of parts of the disc at a certain moment
-	int time
-			The 0th axis specifies the observation
-			The 1st axis represents the x-direction
-			The 2nd axis represents the y-direction
-			The 3rd axis represents the z-direction
-			The 4th axis represents the 8 different predictor variables
-
-	TODO: UNIT TESTING
-		There should be certain relationships between different observations!
-		Have tests to make sure the array has been formed correctly
-	"""
-	X_t_list = []
-	x_cells = snapshot_array.shape[0]
-	y_cells = snapshot_array.shape[1]
-	z_cells = snapshot_array.shape[2]
-	for x_start in range(0, x_cells):
-		x_end = x_start + grid_size
-		if x_end == x_cells:
-			continue
-		elif x_end > x_cells:
-			continue
-
-		for y_start in range(0, y_cells):
-			y_end = y_start + grid_size
-			if y_end == y_cells:
-				continue
-			elif y_end > y_cells:
-				continue
-
-			for z_start in range(0, z_cells):
-				if z_cells == 1:
-					observation = np.expand_dims(
-						snapshot_array[x_start:x_end,y_start:y_end,:,:],
-					0
-					)
-					X_t_list.append(observation)
-	X_t = np.concatenate(X_t_list, axis = 0)
-	return X_t
-
-def get_observations_single_sim(data_relative_path, grid_size, response):
-	"""
-	Return a predictor matrix and a response vector.
-
-	This function returns a predictor matrix and a resposne vector where each
-	observation comes from the same simulation.
-
-	Parameters
-	----------
-	data_relative_path : pathlib.Path
-		A relative path to the folder containing the simulation data
-	grid_size : int
-		The size of each grid to consider as an observation
-	response : str, default="Time"
-		The response variable that you are trying to predict. Options are "time"
-		and "chi"
-
-	Returns
-	-------
-	X : numpy.ndarray
-		5D array representing the design matrix
-			* The 0th axis specifies the observation
-			* The 1st axis represents the x-direction
-			* The 2nd axis represents the y-direction
-			* The 3rd axis represents the z-direction
-			* The 4th axis represents the 8 different predictors
-	y : numpy.ndarray
-		* 1D array representing the response vector
-	"""
-	X_observation_list = []
-	y_observation_list = []
-	hdf5_files = get_hdf5_files(data_relative_path)
-	for file_name in hdf5_files:
-		file_path = data_relative_path / pathlib.Path(file_name)
-		file_object = h5py.File(file_path, "r")
-		(B_x_t, B_y_t, B_z_t, p_t,
-		rho_t, v_x_t, v_y_t, v_z_t) = get_variables_at_snapshot(file_object)
-		snapshot_array = create_snapshot_array(B_x_t, B_y_t, B_z_t, p_t,
-												rho_t, v_x_t, v_y_t, v_z_t)
-		X_t = split_snapshot_array(snapshot_array, grid_size)
-		X_observation_list.append(X_t)
-
-		if response == "time":
-			t = int(file_name[5:9])
-			y_t = np.full((X_t.shape[0], ), t)
-		elif response == "chi":
-			chi = float(data_relative_path.stem.replace("dot","."))
-			y_t = np.full((X_t.shape[0], ), chi)
-		y_observation_list.append(y_t)
-	X = np.concatenate(X_observation_list, axis = 0)
-	y = np.concatenate(y_observation_list, axis = 0)
-	return X, y
-
-def get_simulation_folders(data_path):
-	"""
-	Parameters
-	----------
-	data_path : pathlib.Path
-		A relative path to the folder containing all the simulations
-	Returns
-	-------
-	simulation_paths : list of pathlib.Path
-		List containing relative paths to all the folders containing simulation
-		data
-	"""
-	folders = os.listdir(data_path)
-	simulation_paths = []
-	for folder_name in folders:
-		if folder_name.endswith(".DS_Store"):
-			continue
-		else:
-			simulation_paths.append(data_path / pathlib.Path(folder_name))
-	return simulation_paths
-
-def get_observations_multiple_sims(data_path, grid_size, response):
-	"""
-	Return design matrix and vector of responses where observations come from
-	all the simulations that are in the specified folder
-
-	Parameters
-	----------
-	data_path : pathlib.Path
-		A relative path to the folder containing all the simulations
-	grid_size : int
-		The size of each grid to consider as an observation
-	response : str, default="Time"
-		The response variable that you are trying to predict. Options are "time"
-		and "chi"
-
-	Returns
-	-------
-	X : numpy.ndarray
-		5D array representing the design matrix
-			The 0th axis specifies the observation
-			The 1st axis represents the x-direction
-			The 2nd axis represents the y-direction
-			The 3rd axis represents the z-direction
-			The 4th axis represents the 8 different predictor variables
-	y : numpy.ndarray
-		1D array representing the response vector
-	"""
-	X_list = []
-	y_list = []
-	simulation_paths = get_simulation_folders(data_path)
-	for path in simulation_paths:
-		X_sim, y_sim = get_observations_single_sim(path, grid_size, response)
-		X_list.append(X_sim)
-		y_list.append(y_sim)
-	X = np.concatenate(X_list, axis = 0)
-	y = np.concatenate(y_list, axis = 0)
-	return X, y
-
-def contains_hdf5_files(folder_path):
-	"""
-	Check if a folder contains HDF5 files.
-
-	Parameters
-	----------
-	folder_path : pathlib.Path
-		A path to the folder that is to be checked
-	Returns
-	-------
-	bool
-		True if the folder contains HDF5 files, else False
-	"""
-	for file in os.listdir(folder_path):
-		if file.endswith(".h5"):
-			return True
-	return False
-
-def get_observations(data_path, grid_size = 4, response="time"):
-	"""
-	Return a 5D numpy.ndarray representing a matrix of predictors and a 1D
-	numpy.ndarray representing a vector of responses. Each row represnts
-	an observation of a small section of the disc at a moment in time.
-
-	This function returns the data in the ideal format for supervised learning
-	(format two).
-
-	Parameters
-	----------
-	data_path : pathlib.Path
-		This can be one of two things
-		
-			1. A relative path to a folder containing HDF5 files which each 
-			contain data from a single simulation. In this case all
-			observations come from the same simulation
-
-			2. A relative path to a folder containing multiple folders. Each folder
-			should contain data from a simulation . In this case the observations
-			will come from all of the simulations.
-		
-	grid_size : int
-		The size of each grid to consider as an observation
-	response : str, default="time"
-		The response variable that you are trying to predict. Options are "time"
-		and "chi"
-
-	Returns
-	-------
-	X : numpy.ndarray
-		5D array representing the matrix of predictors
-	y : numpy.ndarray
-		1D array representing the vector of responses
-	"""
-	if contains_hdf5_files(data_path):
-		X, y = get_observations_single_sim(data_path, grid_size, response)
-	else:
-		X, y = get_observations_multiple_sims(data_path, grid_size, response)
-	return X, y

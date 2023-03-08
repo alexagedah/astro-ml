@@ -26,12 +26,8 @@ from .preprocessing import (
 	preprocessor,
 	)
 
-from .read import (
-	get_cell_coordinates,
-	get_time_coordinates,
-	get_fluid_variables,
-	get_variables,
-	get_observations,
+from .simulation import (
+	Simulation
 	)
 
 from .train import (
