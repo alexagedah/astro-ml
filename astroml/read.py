@@ -139,7 +139,7 @@ def get_cell_coordinates(data_relative_path):
 		coordinates = (X[:,:,np.newaxis], Y[:,:,np.newaxis], Z[:,:,np.newaxis])
 	else:
 		coordinates = (X, Y, Z)
-	coordinates_dict = dict(zip(("X","Y","X"),coordinates))
+	coordinates_dict = dict(zip(("X","Y","Z"),coordinates))
 	return coordinates_dict
 
 def get_variables_at_snapshot(file_object):
