@@ -4,7 +4,7 @@ numpy.ndarrays.
 There are two formats for storing data in numpy.ndarrays
 
 Data Format One: Data Exploration
-----------------------------
+----------------------------------
 Data is stored in multiple numpy.ndarrays array, and each array represents a
 certain variable.
 
@@ -82,7 +82,10 @@ def get_hdf5_files(data_relative_path):
 
 def get_time_coordinates(data_relative_path):
 	"""
-	Returns the times in the simulation
+	Returns a dictionary with the times for a simulation
+
+	This function assumes that time = 0 corresponds to the file that appears
+	first alphabetically.
 
 	Parameters
 	----------
@@ -91,24 +94,29 @@ def get_time_coordinates(data_relative_path):
 
 	Returns
 	-------
-	T : numpy.ndarray
-		1D array containing all the time coordinates in the simulation
-
-	TODO:
-	Should I actually get the times from the file names rather than assuming
-	the times start from 0?
+	times : dict of {str:numpy.ndarray}
+		times = {"T":1D numpy.ndarray}. The value is a 1D numpy.ndarray
+		containing all the time coordinates in the simulation
 	"""
 	hdf5_files = get_hdf5_files(data_relative_path)
 	T = np.array(range(len(hdf5_files)))
-	return T
+	times = {"T":T}
+	return times
 
 def get_cell_coordinates(data_relative_path):
 	"""
-	Return the coordinates of the cells in a PLUTO simulation
+	Return a dictionary with the coordinates of the cells in the simulation
 
-	This function returns the coordinates of the cells in a PLUTO simulation.
-	This function gets the coordinates from a single output file (and we assume)
-	that all files have the same coordinates 
+	This function returns a dictionary with the coordinates of the all the cells
+	in a simulation. The keys specify the axis the coordinates are for and the
+	values specifies the coordinates
+
+		* The 0th axis represents the x-direction
+		* The 1st axis represents the y-direction
+		* The 2nd axis represents the z-direction
+
+	This function gets the coordinates from a single output file
+	(and we assume) that all files have the same coordinates.
 
 	Parameters
 	----------
@@ -117,12 +125,9 @@ def get_cell_coordinates(data_relative_path):
 
 	Returns
 	-------
-	X : numpy.ndarray
-		3D array containing the x coordinates of each point in simulation
-	Y : numpy.ndarray
-		3D array containing the y coordinates of each point in the simulation
-	Z : numpy.ndarray
-		3D array containing the z coordinates of each point in the simulation
+	coordinates_dict : dict of {str:numpy.ndarray}
+		Dictionary where each key specifies the axis and the values are 3D
+		numpy.ndarrays representing the coordiantes for that axis
 	"""
 	file_path = data_relative_path / pathlib.Path("data.0000.flt.h5")
 	file_object = h5py.File(file_path, "r")
@@ -131,9 +136,11 @@ def get_cell_coordinates(data_relative_path):
 	Y = cell_coords_group["Y"][:]
 	Z = cell_coords_group["Z"][:]
 	if X.ndim == 2:
-		return X[:,:,np.newaxis], Y[:,:,np.newaxis], Z[:,:,np.newaxis]
+		coordinates = (X[:,:,np.newaxis], Y[:,:,np.newaxis], Z[:,:,np.newaxis])
 	else:
-		return X, Y, Z
+		coordinates = (X, Y, Z)
+	coordinates_dict = dict(zip(("X","Y","X"),coordinates))
+	return coordinates_dict
 
 def get_variables_at_snapshot(file_object):
 	"""
@@ -177,12 +184,19 @@ def get_variables_at_snapshot(file_object):
 	v_z_t = vars_group["vx3"][:][:,:,np.newaxis]
 	return B_x_t, B_y_t, B_z_t, p_t, rho_t, v_x_t, v_y_t, v_z_t
 
-def get_variables(data_relative_path):
+def get_fluid_variables(data_relative_path):
 	"""
-	Return 8 4D numpy.ndarrays which each represent a variable.
+	Return a dictionary containing all the variables which describe the fluid
 
-	This function returns the data in the ideal format for exploration (format
-	one).
+	This function returns a dictionary with all the variables which describe the
+	fluid. The data in the ideal format for exploration. The keys of the
+	dictionary specify the fluid variable.
+	The values are 4D numpy.ndarrays where
+
+		* The 0th axis specifies the x-coordinate
+		* The 1st axis specifies the y-coordinate
+		* The 2nd axis specifies the z-coordinate
+		* The 3rd axis specifies the time
 
 	Parameters
 	----------
@@ -191,10 +205,11 @@ def get_variables(data_relative_path):
 
 	Returns
 	-------
-	variables : dict of {str: numpy.ndarray}
+	fluid_variables  : dict of {str: numpy.ndarray}
 		Dictionary where each string specifies the variable and each value is
 		a 4D numpy.ndarray representing the variable. The keys in the dictionary
 		are B_x, B_y, B_z, p, rho, v_x, v_y and v_z
+
 	"""
 	hdf5_files = get_hdf5_files(data_relative_path)
 
@@ -229,7 +244,7 @@ def get_variables(data_relative_path):
 	v_x = np.concatenate(v_x_list, axis = 3)
 	v_y = np.concatenate(v_y_list, axis = 3)
 	v_z = np.concatenate(v_z_list, axis = 3)
-	variables = {
+	fluid_variables = {
 	"B_x":B_x,
 	"B_y":B_y,
 	"B_z":B_z,
@@ -239,6 +254,45 @@ def get_variables(data_relative_path):
 	"v_y":v_y,
 	"v_z":v_z
 	}
+	return fluid_variables
+
+def get_variables(data_relative_path):
+	"""
+	Return a dictionary with all the relevant variables for a simulation
+
+	Parameters
+	----------
+	data_relative_path : pathlib.Path
+		A relative path to the folder containing the simulation data
+
+	Returns
+	-------
+	variables : dict of {str:numpy.ndarray, str: dict of {str:numpy.ndarray} }
+		The keys in the dictionary are "T","X","Y","Z" and "Fluid Variables".
+
+			* For "T", the corresponding value is a 1D numpy.ndarray which
+			  describes the time coordinate in the simulation
+			* For "X","Y" and "Z", the corresponding value is a 3D numpy.ndarray
+			  which desribes the spacial coordinate in the simulation.
+			* For "Fluid Variables", the correspond value is a dictionary. The
+			  keys for this dictionary are "B_x", "B_y", "B_z", "p", "rho", "v_x",
+			  "v_y" and "v_z". THe corresponding value is a 4D numpy.ndarray
+			  which describes the fluid variable at different points in space
+			  and time.
+
+
+	See Also
+	--------
+	get_time_coordinates
+	get_cell_coordinates
+	get_fluid_variables
+	"""
+	times = get_time_coordinates(data_relative_path)
+	coordinates = get_cell_coordinates(data_relative_path)
+	fluid_variables = get_fluid_variables(data_relative_path)
+	variables = times.copy()
+	variables.update(coordinates)
+	variables.update({"Fluid Variables":fluid_variables})
 	return variables
 
 def create_snapshot_array(B_x_t, B_y_t, B_z_t, p_t, rho_t, v_x_t, v_y_t, v_z_t):

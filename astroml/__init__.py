@@ -18,7 +18,8 @@ from .models import (
 from .plot import (
 	plot_single_distribution,
 	plot_distributions,
-	contour_plot
+	plot_single_contour,
+	plot_contours
 	)
 
 from .preprocessing import (
@@ -28,8 +29,9 @@ from .preprocessing import (
 from .read import (
 	get_cell_coordinates,
 	get_time_coordinates,
+	get_fluid_variables,
+	get_variables,
 	get_observations,
-	get_variables
 	)
 
 from .train import (
