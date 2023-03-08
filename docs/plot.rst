@@ -10,4 +10,6 @@ Functions
 
 .. autofunction:: astroml.plot_distributions
 
-.. autofunction:: astroml.contour_plot
+.. autofunction:: astroml.plot_single_contour
+
+.. autofunction:: astroml.plot_contours
