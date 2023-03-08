@@ -1,55 +1,6 @@
 """
 The read module provides functions for reading data from HDF5 files into 
 numpy.ndarrays.
-There are two formats for storing data in numpy.ndarrays
-
-Data Format One: Data Exploration
-----------------------------------
-Data is stored in multiple numpy.ndarrays array, and each array represents a
-certain variable.
-
-	* The 0th axis represents the x-axis
-	* The 1st axis represents the y-axis
-	* The 2nd axis represents the z-axis
-	* The 4th axis represents the time axis
-
-This format is ideal for data exploration and understanding how different
-quantities for the disc (magnetic field, gas pressure, density, velocity etc...)
-vary over space and time.
-
-Format Two: Supervised Learning
--------------------------------
-Data is stored in a 5D numpy.array representing a matrix of predictors and a
-1D numpy.array represnting a vector of responses. For the matrix of predictors:
-
-	* The 0th axis specifies the observation. Each observation is a small 
-	  snapshot of a disc at a certain moment in time. The size of the snapshot
-	  can be specified and will effect
-
-		1. The total number of observations (larger snapshots means less
-		observations)
-
-		2. The length of the 1st, 2nd and 3rd axes (larger snapshots increase
-		the size of these axes)
-
-	* The 1st axis represents the x-direction
-	* The 2nd axis represents the y-direction
-	* The 3rd axis represents the z-direction
-	* The 4th axis represents the different variables
-
-		* Variable 0: x-component of the magnetic field
-		* Variable 1: y-component of the magnetic field
-		* Variable 2: z-component of the magnetic field
-		* Variable 3: gas pressure
-		* Variable 4: density
-		* Variable 5: x-component of the fluid velocity
-		* Variable 6: y-component of the fluid velocity
-		* Variable 7: z-component of the fluid velocity
-
-
-For the vector of responses, the 0th axis also specifies the observation.
-
-This format is ideal for supervised learning.
 """
 import os
 import pathlib
@@ -254,8 +205,6 @@ def get_fluid_variables(data_relative_path):
 	"v_z":v_z
 	}
 	return fluid_variables
-
-
 
 
 

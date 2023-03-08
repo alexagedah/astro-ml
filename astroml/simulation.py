@@ -153,13 +153,3 @@ class Simulation():
         X = np.concatenate(X_t_list, axis = 0)
         y = np.concatenate(y_t_list, axis = 0)
         return X, y
-
-
-
-
-
-
-
-
-
-
