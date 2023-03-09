@@ -3,6 +3,10 @@ The feature_map module contains the function which returns a dictionary mapping
 indices in the 5D numpy.array representing the matrix of features to the names
 of the features
 """
+DEFAULT_VARIABLES = ["B_x","B_y","B_z","p","rho","u_x","u_y","u_z"] # "default"
+2D_VARIABLES = ["B_x","B_y","p","rho","u_x","u_y"] # "2d"
+EXTRA_VARIABLES = ["B","E_m","u","u_squared","KE","beta","v_A","v_s","H_m"] # "extras"
+
 def verbose_features(features):
     """
     Extend the list of features to the verbose version.
@@ -22,12 +26,15 @@ def verbose_features(features):
         The verbose list of features
 
     """
+    2d_variables = 
     verbose_features = []
     for feature in features:
         if feature == "default":
-            verbose_features += ["B_x","B_y","B_z","p","rho","u_x","u_y","u_z"]
+            verbose_features += DEFAULT_VARIABLES
         elif feature == "2d":
-            verbose_features += ["B_x","B_y","p","rho","u_x","u_y"]
+            verbose_features += 2D_VARIABLES            
+        elif feature == "extras":
+            verbose_features += EXTRA_VARIABLES
         else:
             verbose_features.append(feature)
     return verbose_features
