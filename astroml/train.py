@@ -8,7 +8,7 @@ import shutil
 # 3rd Party
 import tensorflow as tf
 # Libary Specific
-from . import evaluate, plot
+from . import plot
 
 tf.random.set_seed(42)
 
@@ -38,11 +38,6 @@ def train_model(model, model_name, X_train, X_valid, y_train, y_valid, epochs=10
 		data set
 	epochs: int, default=1000
 		The number of epochs to train for
-
-	Returns
-	-------
-	model : tf.keras.Model
-		The fitted model
 	"""
 	checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(f"training/{model_name}/my_checkpoints",
                                                   save_weights_only = True)
@@ -51,10 +46,9 @@ def train_model(model, model_name, X_train, X_valid, y_train, y_valid, epochs=10
 	history = model.fit(X_train, y_train, epochs=epochs,
 								validation_data=(X_valid, y_valid),
 								callbacks = [checkpoint_cb, early_stopping_cb])
-	model.save(f"astroml/saved_models/{model_name}")
+	model.save(f"saved_models/{model_name}")
 	clear_folder("training")
 	plot.plot_learning_curve(history, model_name)
-	return model
 
 def clear_folder(folder):
 	"""
