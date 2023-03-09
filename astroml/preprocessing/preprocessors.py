@@ -6,23 +6,18 @@ is in a format suitable for supervised learning
 import numpy as np
 import tensorflow as tf
 # Local
-from . import dimension_reduction, features, normalisation, split
+from . import normalisation, split
 
-def preprocessor(X, y, train_size=0.8, valid_size=0.1, feature_list=[], apply_standard_scaling="yes"):
+def preprocessor(X, y, feature_scaling="standard", response_scaling="min-max", train_size=0.8, valid_size=0.1):
 	"""
 	Preprocess the data so it is ready for machine learning
 
 	Preprocessing steps
 
-		#. Add additional features (optional)
-		#. Remove extra dimensions from the matrix of predictors if the
-		   simulation is 2D
 		#. Split the data set into training, validation and test data sets
 		#. Apply standard scaling to the predictors (optional)
 		#. Apply min-max scaling to the response so that it is between -1 and 1
-
-	This preprocessor is considerd "standard' as these are the typical steps 
-	that would get taken in a machine learning project
+		   (optional)
 
 	Parameters
 	----------
@@ -30,14 +25,14 @@ def preprocessor(X, y, train_size=0.8, valid_size=0.1, feature_list=[], apply_st
 		5D array representing the matrix of predictors
 	y : numpy.ndarray
 		1D array representing the vector of responses
+	feature_scaling : default="standard"
+		The scaling that should be applied to the features
+	response_scaling : default="min-max"
+		The scaling that should be applied to the responses
 	train_size : float, default=0.8
 		The proportion of the data set to put into the training data set
 	valid_size : float, default=0.1
 		The proportion of the data set to put into the validation data set
-	feature_list :
-		A list of the additional features to include in the model
-	apply_standard_scaling : 
-		Whether standard scaling should be applied to the predictors
 
 	Returns
 	-------
@@ -59,18 +54,15 @@ def preprocessor(X, y, train_size=0.8, valid_size=0.1, feature_list=[], apply_st
 	y_test : numpy.ndarray
 		1D numpy.ndarray representing the vector of response for the test
 		data set
-	feature_map : dictionary of {int:str}
-		Dictionary indicating which features are at which index in the matrix of
-		predictors
-	min_max_transformer : sklearn.preprocessing.MinMaxScaler
-		Scikit-learn transformer for the response
+	response_transformer : sklearn.preprocessing.Transfomer or None
+		A Scikit-learn transformer for the response. If no transformer is used,
+		return None
 	"""
-	X, feature_map = features.add_features(X, feature_list)
-	X, feature_map = dimension_reduction.remove_extra_dimesions(X, feature_map)
 	(X_train, X_valid, X_test,
 	y_train, y_valid, y_test) = split.train_valid_test_split(X, y.reshape(-1, 1), train_size, valid_size)
-	if apply_standard_scaling == "yes":
+	if feature_scaling == "standard":
 		X_train, X_valid, X_test = normalisation.standard_scaler(X_train, X_valid, X_test)
-	y_train, y_valid, y_test, min_max_transformer = normalisation.min_max_scaler(y_train, y_valid, y_test)
-	return X_train, X_valid, X_test, y_train, y_valid, y_test, feature_map, min_max_transformer
+	if response_scaling == "min-max":
+		y_train, y_valid, y_test, response_transformer = normalisation.min_max_scaler(y_train, y_valid, y_test)
+	return X_train, X_valid, X_test, y_train, y_valid, y_test, response_transformer
 

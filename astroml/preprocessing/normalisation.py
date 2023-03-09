@@ -2,6 +2,7 @@
 The normaliastion module contains functions for normalising the data
 """
 # 3rd Party
+import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 def standard_scaler(X_train, X_valid, X_test):
@@ -69,7 +70,23 @@ def min_max_scaler(y_train, y_valid, y_test):
     return y_train_scaled, y_valid_scaled, y_test_scaled, min_max_transformer
 
 def standardise(x, mean, std):
-    return (x - mean)/std
+    """
+    Standardise a feature
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+    mean : float
+    std : float
+    Returns
+    -------
+    x_standarised : numpy.ndarray
+    """
+    x_minus_mean = x - mean
+    x_standarised = np.divide(x_minus_mean, std, out=np.zeros_like(x_minus_mean), where=std!=0)
+    return x_standarised
+
+
 
 
 

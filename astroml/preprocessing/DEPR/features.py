@@ -1,4 +1,5 @@
 """
+DEPRECIATED
 The features module contains functions for creating and adding features
 """
 # 3rd Party

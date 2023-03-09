@@ -1,4 +1,5 @@
 """
+DEPRECIATED
 The dimension reduction module contains the function for removing the z-axis
 (3rd axis) from each observation if the data is 2D, and the predictors B_z and
 v_z
