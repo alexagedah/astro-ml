@@ -114,11 +114,11 @@ def get_variables_at_snapshot(file_object):
 		3D array containing the pressure at each cell
 	rho_t : numpy.ndarray
 		3D array containing the density at each cell
-	v_x_t : numpy.ndarray
+	u_x_t : numpy.ndarray
 		3D array containing the x component of the velocity at each cell
-	v_y_t : numpy.ndarray
+	u_y_t : numpy.ndarray
 		3D array containing the y component of the velocity at each cell
-	v_z_t : numpy.ndarray
+	u_z_t : numpy.ndarray
 		3D array containing the y component of the velocity at each cell
 	"""
 	timestep_key = list(file_object.keys())[0]
@@ -129,10 +129,10 @@ def get_variables_at_snapshot(file_object):
 	B_z_t = vars_group["Bx3"][:][:,:,np.newaxis]
 	p_t = vars_group["prs"][:][:,:,np.newaxis]
 	rho_t = vars_group["rho"][:][:,:,np.newaxis]
-	v_x_t = vars_group["vx1"][:][:,:,np.newaxis]
-	v_y_t = vars_group["vx2"][:][:,:,np.newaxis]
-	v_z_t = vars_group["vx3"][:][:,:,np.newaxis]
-	return B_x_t, B_y_t, B_z_t, p_t, rho_t, v_x_t, v_y_t, v_z_t
+	u_x_t = vars_group["vx1"][:][:,:,np.newaxis]
+	u_y_t = vars_group["vx2"][:][:,:,np.newaxis]
+	u_z_t = vars_group["vx3"][:][:,:,np.newaxis]
+	return B_x_t, B_y_t, B_z_t, p_t, rho_t, u_x_t, u_y_t, u_z_t
 
 def get_fluid_variables(data_relative_path):
 	"""
@@ -158,7 +158,7 @@ def get_fluid_variables(data_relative_path):
 	fluid_variables  : dict of {str: numpy.ndarray}
 		Dictionary where each string specifies the variable and each value is
 		a 4D numpy.ndarray representing the variable. The keys in the dictionary
-		are B_x, B_y, B_z, p, rho, v_x, v_y and v_z
+		are B_x, B_y, B_z, p, rho, u_x, u_y and u_z
 
 	"""
 	hdf5_files = get_hdf5_files(data_relative_path)
@@ -168,41 +168,41 @@ def get_fluid_variables(data_relative_path):
 	B_z_list = []
 	p_list = []
 	rho_list = []
-	v_x_list = []
-	v_y_list = []
-	v_z_list = []
+	u_x_list = []
+	u_y_list = []
+	u_z_list = []
 
 	for file_name in hdf5_files:
 		file_path = data_relative_path / pathlib.Path(file_name)
 		file_object = h5py.File(file_path, "r")
 		(B_x_t, B_y_t, B_z_t, p_t,
-		rho_t, v_x_t, v_y_t, v_z_t) = get_variables_at_snapshot(file_object)
+		rho_t, u_x_t, u_y_t, u_z_t) = get_variables_at_snapshot(file_object)
 		B_x_list.append(B_x_t[:,:,:,np.newaxis])
 		B_y_list.append(B_y_t[:,:,:,np.newaxis])
 		B_z_list.append(B_z_t[:,:,:,np.newaxis])
 		p_list.append(p_t[:,:,:,np.newaxis])
 		rho_list.append(rho_t[:,:,:,np.newaxis])
-		v_x_list.append(v_x_t[:,:,:,np.newaxis])
-		v_y_list.append(v_y_t[:,:,:,np.newaxis])
-		v_z_list.append(v_z_t[:,:,:,np.newaxis])
+		u_x_list.append(u_x_t[:,:,:,np.newaxis])
+		u_y_list.append(u_y_t[:,:,:,np.newaxis])
+		u_z_list.append(u_z_t[:,:,:,np.newaxis])
 
 	B_x = np.concatenate(B_x_list, axis = 3)
 	B_y = np.concatenate(B_y_list, axis = 3)
 	B_z = np.concatenate(B_z_list, axis = 3)
 	p = np.concatenate(p_list, axis = 3)
 	rho = np.concatenate(rho_list, axis = 3)
-	v_x = np.concatenate(v_x_list, axis = 3)
-	v_y = np.concatenate(v_y_list, axis = 3)
-	v_z = np.concatenate(v_z_list, axis = 3)
+	u_x = np.concatenate(u_x_list, axis = 3)
+	u_y = np.concatenate(u_y_list, axis = 3)
+	u_z = np.concatenate(u_z_list, axis = 3)
 	fluid_variables = {
 	"B_x":B_x,
 	"B_y":B_y,
 	"B_z":B_z,
 	"p":p,
 	"rho":rho,
-	"v_x":v_x,
-	"v_y":v_y,
-	"v_z":v_z
+	"u_x":u_x,
+	"u_y":u_y,
+	"u_z":u_z
 	}
 	return fluid_variables
 
