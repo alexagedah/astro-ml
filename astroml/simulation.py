@@ -1,5 +1,6 @@
 """
-The simulation module contains the Simulation class.
+The simulation module contains the Simulation class and functions which take
+simulation objects as arguments
 """
 # Standard Library
 import pathlib
@@ -29,6 +30,10 @@ class Simulation():
 
     Attributes
     ----------
+    filename : str
+        The name of the file containing the simulation data
+    exploration_folder : str
+        The name of the folder which will contain all the plots 
     x : numpy.ndaaray
         3D numpy.ndarray representing the x-coordiantes
     y : numpy.ndarray
@@ -99,11 +104,11 @@ class Simulation():
     """
     def __init__(self, filename):
         self.filename = filename
+        self.exploration_folder = f"exploration/{filename[5:]}/"
         self.chi = float(filename[10:].replace("dot","."))
         self.x, self.y, self.z = read.get_cell_coordinates(filename)
         self.t = read.get_time_coordinates(filename)
         self.fluid_variables = read.get_fluid_variables(filename)
-        self.exploration_folder = f"exploration/{filename[5:]}/"
 
     # Machine Learning
     def get_observations(self, observation_size, features, response):
@@ -112,7 +117,7 @@ class Simulation():
 
         Parameters
         ----------
-        snapsht : int
+        observation_size : int
             The length of each 2D grid or 3D cube
         features : list of str
             The list of features to use
@@ -463,9 +468,48 @@ class Simulation():
         self.fluid_variables["H_m"] = (self.fluid_variables["B_x"]*self.fluid_variables["u_x"] 
             + self.fluid_variables["B_y"]*self.fluid_variables["u_y"]
             + self.fluid_variables["B_z"]*self.fluid_variables["u_z"])
-    
 
+def get_cross_observations(simulation_list, observation_size, features, response):
+    """
+    Return a matrix of features and a vector of responses.
 
+    THis functions returns a matrix of features and a vector of responses, where
+    the observations come from a range of different simulations
+
+    Parameters
+    ----------
+    simulation_list : list of astroml.Simulation
+        A list where each element is an instance of the Simulation class
+    observation_size : int
+        The length of each 2D grid or 3D cube
+    features : list of str
+        The list of features to use
+    response : str
+        The response variable
+
+    Returns
+    -------
+    X : numpy.ndarray
+        5D nuumpy.ndarray representing the matrix of features
+
+            * The 0th axis specifies the observation
+            * The 1st axis represents the x-direction
+            * The 2nd axis represents the y-direction
+            * The 3rd axis represents the z-direction
+            * The 4th axis represents the different features
+
+    y : numpy.ndarray
+        1D numpy.ndarray representing the response vector
+    """
+    X_list = []
+    y_list = []
+    for simulation in simulation_list:
+        X_sim, y_sim = simulation.get_observations(observation_size, features, response)
+        X_list.append(X_sim)
+        y_list.append(y_sim)
+    X = np.concatenate(X_list, axis=0)
+    y = np.concatenate(y_list, axis=0)
+    return X, y
 
 
 

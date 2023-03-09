@@ -1,6 +1,11 @@
 Simulation
 ==========
 
+.. automodule:: astroml.simulation
+
+Simulation Class
+----------------
+
 .. autoclass:: astroml.Simulation
 
     .. rubric:: Machine Learning
@@ -27,3 +32,9 @@ Simulation
     .. automethod:: add_speed_of_sound
     .. automethod:: add_alfven_div_sound
     .. automethod:: add_cross_helicity
+
+Functions
+---------
+
+.. autofunction:: astroml.get_cross_observations
+

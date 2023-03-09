@@ -15,7 +15,8 @@ from .preprocessing import (
 	)
 
 from .simulation import (
-	Simulation
+	Simulation,
+	get_cross_observations
 	)
 
 from .train import (
