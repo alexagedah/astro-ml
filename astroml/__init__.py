@@ -11,7 +11,8 @@ from .models import (
 	)
 
 from .preprocessing import (
-	preprocessor,
+	get_feature_map,
+	preprocessor
 	)
 
 from .simulation import (
