@@ -7,11 +7,15 @@ import pathlib
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.constants as constants
 # Local
 from . import convert_format, read
 
 mpl.rcParams["font.family"] = "Times New Roman"
 plt.style.use("default")
+
+# Constants
+mu_0 = constants.physical_constants["vacuum mag. permeability"][0]
 
 class Simulation():
     """
@@ -47,10 +51,12 @@ class Simulation():
 
     Methods
     -------
-    get_observations(grid_size, response)
+    get_observations(grid_size, features, response)
         Return a matrix of features and a vector of responses.
     get_feature_map(features)
         Return a dictionary mapping indicies to features
+    plot_all()
+        Plot the distributions of all the initialised fluid variables
     plot_distribution_at_time(variable_name, time=None, show_fig=False)
         Plot a histogram showing the distribution of a variable
     plot_all_distributions_at_time(time=None)
@@ -69,8 +75,21 @@ class Simulation():
         Plot contours for a variable in a plane at various times
     plot_all_contours_over_time(z=0)
         Plot contours for all the variables in a plane at various times
+    add_all_variables()
+        Add all the possible additional fluid variables
+    add_magnetic_field_magnitude()
+        Add the magnitude of the magnetic field to the fluid variables
     add_magnetic_energy_density()
         Add the magnetic energy density to the fluid variables
+    add_speed()
+        Add speed to the fluid variables
+    add_speed_squared()
+        Add speed squared to the fluid variables
+    add_plasma_beta()
+        Add plasma beta the the fluid variables
+    add_alfven_wave_speed()
+        Add alfven wave speed to the fluid variables
+    add_cross_helicity()
     """
     def __init__(self, filename):
         self.filename = filename
@@ -181,6 +200,15 @@ class Simulation():
         save_name = self.exploration_folder + plot_name
         figure.savefig(save_name)
 
+    def plot_all(self):
+        """
+        Plot the distributions of all the initialised fluid variables
+        """
+        method_list = [func for func in dir(self) if callable(getattr(self, func)) and func.startswith("plot_all_")]
+        for method_name in method_list:
+            method = getattr(self,method_name)
+            method()
+
     def plot_distribution_at_time(self, variable_name, time=None, show_fig=False):
         """
         Plot the distribution of a variable at a time
@@ -247,7 +275,7 @@ class Simulation():
                 time = times_to_plot[i*3+j]
                 axes[i,j].hist(array[:,i*3+j], bins = 100)
                 axes[i,j].set_title(f"The Distribution of {variable_name} at time = {time}", {'fontsize':10})
-                axes[i,j].set_xlabel("B_x", {'fontsize': 4})
+                axes[i,j].set_xlabel(variable_name, {'fontsize': 4})
                 axes[i,j].set_ylabel("Frequency", {'fontsize': 4})
         self.save_show_plot(fig, f"{variable_name}_distributions_over_time", show_fig)
 
@@ -297,23 +325,6 @@ class Simulation():
         ax.grid(True)
         self.save_show_plot(fig, f"{variable_name}_{z}_contour_at_{time}", show_fig)
 
-    def plot_all_contours_at_time(self, time, z=0):
-        """
-        Plot contours of all the variables at a specific time
-
-        Parameters
-        ----------
-        time : int
-            The time to plot the histogram for. The default None plots for the
-            variable across all time
-        z : int, default=0
-            The z-coordinate to plot the variable at. The default is 0 which plots
-            the variable in the z = 0 plane. This should be used if the data set is
-            2D.
-        """
-        for variable_name in self.fluid_variables.keys():
-            self.plot_contour_at_time(variable_name, time)
-
     def plot_contours_over_time(self, variable_name, z=0, show_fig=False):
         """
         Plot contours for a variable in a plane at various times
@@ -362,6 +373,23 @@ class Simulation():
         for variable_name in self.fluid_variables.keys():
             self.plot_contours_over_time(variable_name)
     # Additional Variables
+    def add_all_variables(self):
+        """
+        Add all the possible additional fluid variables
+        """
+        method_list = [func for func in dir(self) if callable(getattr(self, func)) and func.startswith("add") and not func.startswith("add_all")]
+        for method_name in method_list:
+            method = getattr(self,method_name)
+            method()
+
+    def add_magnetic_field_magnitude(self):
+        """
+        Add the magnitude of the magnetic field to the fluid variables
+        """
+        self.fluid_variables["B"] = np.sqrt(self.fluid_variables["B_x"]**2 
+            + self.fluid_variables["B_y"]**2 
+            + self.fluid_variables["B_z"]**2)
+
     def add_magnetic_energy_density(self):
         """
         Add the magnetic energy density to the fluid variables
@@ -371,7 +399,50 @@ class Simulation():
         """
         self.fluid_variables["p_B"] = (self.fluid_variables["B_x"]**2 
             + self.fluid_variables["B_y"]**2 
-            + self.fluid_variables["B_z"]**2)
+            + self.fluid_variables["B_z"]**2)/(2*mu_0)
+
+    def add_speed(self):
+        """
+        Add speed to the fluid variables
+        """
+        self.fluid_variables["u"] = np.sqrt(self.fluid_variables["u_x"]**2 
+            + self.fluid_variables["u_y"]**2 
+            + self.fluid_variables["u_z"]**2)
+
+    def add_speed_squared(self):
+        """
+        Add speed squared to the fluid variables
+        """
+        self.fluid_variables["u_squared"] = (self.fluid_variables["u_x"]**2 
+            + self.fluid_variables["u_y"]**2 
+            + self.fluid_variables["u_z"]**2)
+
+    def add_plasma_beta(self):
+        """
+        Add plasma beta the the fluid variables
+        """
+        self.fluid_variables["beta"] = self.fluid_variables["p"]/((
+            self.fluid_variables["B_x"]**2 +
+            self.fluid_variables["B_y"]**2 + 
+            self.fluid_variables["B_z"]**2)/(2*mu_0))
+
+    def add_alfven_wave_speed(self):
+        """
+        Add Alfven wave speed to the fluid variables
+        """
+        self.fluid_variables["v_A"] = np.sqrt(self.fluid_variables["B_x"]**2 
+            + self.fluid_variables["B_y"]**2 
+            + self.fluid_variables["B_z"]**2)/np.sqrt(mu_0*self.fluid_variables["rho"])
+
+    def add_cross_helicity(self):
+        """
+        Add cross-helicity to the fluid variables
+        """
+        self.fluid_variables["H_m"] = (self.fluid_variables["B_x"]*self.fluid_variables["u_x"] 
+            + self.fluid_variables["B_y"]*self.fluid_variables["u_y"]
+            + self.fluid_variables["B_z"]*self.fluid_variables["u_z"])
+    
+
 
 
 
