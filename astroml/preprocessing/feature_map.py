@@ -7,9 +7,9 @@ def verbose_features(features):
     """
     Extend the list of features to the verbose version.
 
-    This function extends the list of features the verbose version. If "default"
-    is included, then this is replaced with all the default fluid variables:
-    "B_x","B_y","B_z","p","rho","u_x","u_y","u_z"
+    This function extends the list of features the verbose version.
+    If "default" is included, then this is replaced with all the default fluid,
+    variables: "B_x","B_y","B_z","p","rho","u_x","u_y","u_z"
 
     Parameters
     ----------
@@ -26,6 +26,8 @@ def verbose_features(features):
     for feature in features:
         if feature == "default":
             verbose_features += ["B_x","B_y","B_z","p","rho","u_x","u_y","u_z"]
+        elif feature == "2D":
+            verbose_features += ["B_x","B_y","p","rho","u_x","u_y"]
         else:
             verbose_features.append(feature)
     return verbose_features
@@ -50,3 +52,4 @@ def get_feature_map(features):
     indices = range(len(verbose_features_list))
     feature_map = dict(zip(indices, verbose_features_list))
     return feature_map
+
