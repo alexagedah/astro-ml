@@ -92,6 +92,8 @@ class Simulation():
         Add speed to the fluid variables
     add_speed_squared()
         Add speed squared to the fluid variables
+    add_kinetic_energy_density()
+        Add kinetic energy density to the fluid variables
     add_plasma_beta()
         Add plasma beta the the fluid variables
     add_alfven_wave_speed()
@@ -408,6 +410,14 @@ class Simulation():
         self.fluid_variables["u_squared"] = (self.fluid_variables["u_x"]**2 
             + self.fluid_variables["u_y"]**2 
             + self.fluid_variables["u_z"]**2)
+
+    def add_kinetic_energy_density(self):
+        """
+        Add kinetic energy density to the fluid variables
+        """
+        self.fluid_variables["KE"] = self.fluid_variables["rho"]*(self.fluid_variables["u_x"]**2 
+            + self.fluid_variables["u_y"]**2
+            + self.fluid_variables["u_z"]**2)/2
 
     def add_plasma_beta(self):
         """

@@ -27,6 +27,7 @@ Simulation Class
     .. automethod:: add_magnetic_energy_density
     .. automethod:: add_speed
     .. automethod:: add_speed_squared
+    .. automethod:: add_kinetic_energy_density
     .. automethod:: add_plasma_beta
     .. automethod:: add_alfven_wave_speed
     .. automethod:: add_speed_of_sound
