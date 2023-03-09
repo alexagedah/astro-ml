@@ -9,7 +9,7 @@ Astrophysical Machine Learning
 Astrophysical Machine Learning is a library that applies machine learning techniques to accretion discs.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents:
 
    evaluate
