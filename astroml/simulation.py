@@ -1,55 +1,5 @@
 """
 The simulation module contains the Simulation class.
-
-There are two formats for storing data in numpy.ndarrays
-
-Data Format One: Data Exploration
-----------------------------------
-Data is stored in multiple numpy.ndarrays array, and each array represents a
-certain variable.
-
-    * The 0th axis represents the x-axis
-    * The 1st axis represents the y-axis
-    * The 2nd axis represents the z-axis
-    * The 4th axis represents the time axis
-
-This format is ideal for data exploration and understanding how different
-quantities for the disc (magnetic field, gas pressure, density, velocity etc...)
-vary over space and time.
-
-Format Two: Supervised Learning
--------------------------------
-Data is stored in a 5D numpy.array representing a matrix of predictors and a
-1D numpy.array represnting a vector of responses. For the matrix of predictors:
-
-    * The 0th axis specifies the observation. Each observation is a small 
-      snapshot of a disc at a certain moment in time. The size of the snapshot
-      can be specified and will effect
-
-        1. The total number of observations (larger snapshots means less
-        observations)
-
-        2. The length of the 1st, 2nd and 3rd axes (larger snapshots increase
-        the size of these axes)
-
-    * The 1st axis represents the x-direction
-    * The 2nd axis represents the y-direction
-    * The 3rd axis represents the z-direction
-    * The 4th axis represents the different variables
-
-        * Variable 0: x-component of the magnetic field
-        * Variable 1: y-component of the magnetic field
-        * Variable 2: z-component of the magnetic field
-        * Variable 3: gas pressure
-        * Variable 4: density
-        * Variable 5: x-component of the fluid velocity
-        * Variable 6: y-component of the fluid velocity
-        * Variable 7: z-component of the fluid velocity
-
-
-For the vector of responses, the 0th axis also specifies the observation.
-
-This format is ideal for supervised learning.
 """
 # Standard Library
 import pathlib
@@ -97,9 +47,10 @@ class Simulation():
 
     Methods
     -------
-    get_grid_observations(grid_size, response)
-        Return a 5D numpy.ndarray representing a matrix of predictors and a 1D
-        numpy.ndarray representing a vector of responses.
+    get_observations(grid_size, response)
+        Return a matrix of features and a vector of responses.
+    get_feature_map(features)
+        Return a dictionary mapping indicies to features
     plot_distribution_at_time(variable_name, time=None, show_fig=False)
         Plot a histogram showing the distribution of a variable
     plot_all_distributions_at_time(time=None)
@@ -118,9 +69,8 @@ class Simulation():
         Plot contours for a variable in a plane at various times
     plot_all_contours_over_time(z=0)
         Plot contours for all the variables in a plane at various times
-
-
-    calculate methods..
+    add_magnetic_energy_density()
+        Add the magnetic energy density to the fluid variables
     """
     def __init__(self, filename):
         self.filename = filename
@@ -130,6 +80,7 @@ class Simulation():
         self.fluid_variables = read.get_fluid_variables(filename)
         self.exploration_folder = f"exploration/{filename[5:]}/"
 
+    # Machine Learning
     def get_observations(self, observation_size, features, response):
         """
         Return a matrix of features and a vector of responses.
@@ -146,13 +97,13 @@ class Simulation():
         Returns
         -------
         X : numpy.ndarray
-            5D array representing the design matrix
+            5D nuumpy.ndarray representing the matrix of features
 
                 * The 0th axis specifies the observation
                 * The 1st axis represents the x-direction
                 * The 2nd axis represents the y-direction
                 * The 3rd axis represents the z-direction
-                * The 4th axis represents the 8 different predictors
+                * The 4th axis represents the different features
 
         y : numpy.ndarray
             1D numpy.ndarray representing the response vector
@@ -176,6 +127,27 @@ class Simulation():
         y = np.concatenate(y_t_list, axis = 0)
         return X, y
 
+    def get_feature_map(self, features):
+        """
+        Return a dictionary mapping indicies to features
+
+        Parameters
+        ----------
+        features : list of str
+            The list of features to use
+
+        Returns
+        -------
+        feature_map : dict of {int:str}
+            Dictionary where the keys are the indicies of the 4th axis of the
+            matrix of features and the values are the corresponding features
+            at that index. The default is {0:"B_x",1:"B_y",2:"B_z"}
+        """
+        indices = range(len(features))
+        feature_map = dict(zip(indices, features))
+        return feature_map
+
+    # Plotting
     def save_show_plot(self, figure, plot_name, show_fig):
         """
         Save a figure to the exploration folder for the simulation and show it
@@ -389,7 +361,7 @@ class Simulation():
         """
         for variable_name in self.fluid_variables.keys():
             self.plot_contours_over_time(variable_name)
-
+    # Additional Variables
     def add_magnetic_energy_density(self):
         """
         Add the magnetic energy density to the fluid variables
