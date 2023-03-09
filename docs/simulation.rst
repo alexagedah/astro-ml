@@ -25,5 +25,5 @@ Simulation
     .. automethod:: add_plasma_beta
     .. automethod:: add_alfven_wave_speed
     .. automethod:: add_speed_of_sound
-    .. automethod:: add_alfven_minus_sound
+    .. automethod:: add_alfven_div_sound
     .. automethod:: add_cross_helicity
