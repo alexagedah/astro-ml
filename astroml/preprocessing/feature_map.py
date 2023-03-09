@@ -26,7 +26,7 @@ def verbose_features(features):
     for feature in features:
         if feature == "default":
             verbose_features += ["B_x","B_y","B_z","p","rho","u_x","u_y","u_z"]
-        elif feature == "2D":
+        elif feature == "2d":
             verbose_features += ["B_x","B_y","p","rho","u_x","u_y"]
         else:
             verbose_features.append(feature)
