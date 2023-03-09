@@ -8,20 +8,19 @@ __pycache__/
 *.h5
 *.docx
 
-trainer.py
-tuner.py
-evaluator.py
 exploration.py
+trainer_time.py
+trainer_chi.py
 
-# Model fitting
-astroml/saved_models
+# Folders
 data
 exploration
-training
+hp_tuning
 importance
 learning_curves
 results
-hp_tuning
+saved_models
+training
 
 docs/_build/
 docs/_template

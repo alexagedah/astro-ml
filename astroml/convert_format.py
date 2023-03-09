@@ -82,10 +82,6 @@ def get_features_at_time(all_fluid_variables, features_to_include, time):
     -------
     features_t : numpy.ndarray
         4D numpy.ndarray representing the features at a certain moment in time
-
-    TODO
-    ----
-    Also return a dictionary which specifies which features are at which index
     """
     features_list_t = []
     for feature_name in features_to_include:

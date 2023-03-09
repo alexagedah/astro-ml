@@ -11,6 +11,7 @@ import numpy as np
 import scipy.constants as constants
 # Local
 from . import convert_format, read
+from .preprocessing import feature_map
 
 mpl.rcParams["font.family"] = "Times New Roman"
 plt.style.use("default")
@@ -142,7 +143,7 @@ class Simulation():
         y_t_list = []
         for t in self.t:
             X_t = convert_format.disc_t_to_feature_matrix(self.fluid_variables,
-                features,
+                feature_map.verbose_features(features),
                 t,
                 observation_size)
             X_t_list.append(X_t)
@@ -156,26 +157,6 @@ class Simulation():
         X = np.concatenate(X_t_list, axis = 0)
         y = np.concatenate(y_t_list, axis = 0)
         return X, y
-
-    def get_feature_map(self, features):
-        """
-        Return a dictionary mapping indicies to features
-
-        Parameters
-        ----------
-        features : list of str
-            The list of features to use
-
-        Returns
-        -------
-        feature_map : dict of {int:str}
-            Dictionary where the keys are the indicies of the 4th axis of the
-            matrix of features and the values are the corresponding features
-            at that index. The default is {0:"B_x",1:"B_y",2:"B_z"}
-        """
-        indices = range(len(features))
-        feature_map = dict(zip(indices, features))
-        return feature_map
 
     # Plotting
     def save_show_plot(self, figure, plot_name, show_fig):
@@ -510,15 +491,6 @@ def get_cross_observations(simulation_list, observation_size, features, response
     X = np.concatenate(X_list, axis=0)
     y = np.concatenate(y_list, axis=0)
     return X, y
-
-
-
-
-
-
-
-
-
 
 
 
