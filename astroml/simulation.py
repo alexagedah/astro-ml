@@ -378,7 +378,7 @@ class Simulation():
         """
         Add the magnitude of the magnetic field to the fluid variables
         """
-        self.fluid_variables["B"] = np.sqrt(self.fluid_variables["B_x"]**2 
+        self.fluid_variables["B"] = np.sqrt(self.fluid_variables["B_x"]**2
             + self.fluid_variables["B_y"]**2 
             + self.fluid_variables["B_z"]**2)
 
@@ -389,7 +389,7 @@ class Simulation():
         We set the permitivity of free space to 1 therefore the magnetic energy
         density is equivalent to the squared magnitude of the magnetic field
         """
-        self.fluid_variables["p_B"] = (self.fluid_variables["B_x"]**2 
+        self.fluid_variables["E_m"] = (self.fluid_variables["B_x"]**2 
             + self.fluid_variables["B_y"]**2 
             + self.fluid_variables["B_z"]**2)/(2*MU_0)
 
