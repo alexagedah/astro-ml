@@ -8,6 +8,7 @@ from .importance import (
 
 from .models import (
 	get_regression_mlp,
+	get_model_name
 	)
 
 from .preprocessing import (
