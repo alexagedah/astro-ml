@@ -10,6 +10,7 @@ __pycache__/
 
 exploration.py
 trainer_time.py
+trainer_all_times.py
 trainer_chi.py
 tuner_time.py
 
