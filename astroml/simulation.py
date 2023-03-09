@@ -100,8 +100,6 @@ class Simulation():
         Add alfven wave speed to the fluid variables
     add_speed_of_sound()
         Add speed of sound to the fluid variables
-    add_alfven_div_sound()
-        Add the difference between the Alfven wave speed and the speed of sound
     add_cross_helicity()
         Add cross-helicity to the fluid variables
     """
@@ -441,16 +439,6 @@ class Simulation():
         Add speed of sound to the fluid variables
         """
         self.fluid_variables["v_s"] = np.sqrt(GAMMA*self.fluid_variables["p"]/self.fluid_variables["rho"])
-
-    def add_alfven_div_sound(self):
-        """
-        Add the Alfven wave speed divided by the the speed of sound
-        """
-        v_A = np.sqrt(self.fluid_variables["B_x"]**2 
-            + self.fluid_variables["B_y"]**2 
-            + self.fluid_variables["B_z"]**2)/np.sqrt(MU_0*self.fluid_variables["rho"])
-        v_s = np.sqrt(GAMMA*self.fluid_variables["p"]/self.fluid_variables["rho"])
-        self.fluid_variables["v_A_div_v_s"] = v_A/v_s
 
     def add_cross_helicity(self):
         """
