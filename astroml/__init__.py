@@ -1,8 +1,3 @@
-from .calculate import (
-	magnetic_energy,
-	magnetic_energy_density
-	)
-
 from .evaluate import (
 	evaluate_model
 	)
@@ -13,13 +8,6 @@ from .importance import (
 
 from .models import (
 	get_regression_mlp,
-	)
-
-from .plot import (
-	plot_single_distribution,
-	plot_distributions,
-	plot_single_contour,
-	plot_contours
 	)
 
 from .preprocessing import (
