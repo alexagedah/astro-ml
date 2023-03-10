@@ -63,7 +63,7 @@ class Simulation():
     get_feature_map(features)
         Return a dictionary mapping indicies to features
     plot_all()
-        Plot the distributions of all the initialised fluid variables
+        Plot all the initialised fluid variables
     plot_distribution_at_time(variable_name, time=None, show_fig=False)
         Plot a histogram showing the distribution of a variable
     plot_all_distributions_at_time(time=None)
@@ -82,6 +82,10 @@ class Simulation():
         Plot contours for a variable in a plane at various times
     plot_all_contours_over_time(z=0)
         Plot contours for all the variables in a plane at various times
+    plot_streamlines_over_time(variable_name, z=0)
+        Plot streamlines for the variable
+    plot_all_streamlines_over_time(z=0)
+        Plot streamlines for all the vector-valued variables
     add_all_variables()
         Add all the possible additional fluid variables
     add_magnetic_field_magnitude()
@@ -159,6 +163,7 @@ class Simulation():
         return X, y
 
     # Plotting
+    # --------------------------------------------------------------------------
     def save_show_plot(self, figure, plot_name, show_fig):
         """
         Save a figure to the exploration folder for the simulation and show it
@@ -194,7 +199,7 @@ class Simulation():
 
     def plot_all(self):
         """
-        Plot the distributions of all the initialised fluid variables
+        Plot all the initialised fluid variables
         """
         method_list = [func for func in dir(self) if callable(getattr(self, func)) and func.startswith("plot_all_")]
         for method_name in method_list:
@@ -363,8 +368,56 @@ class Simulation():
             2D.
         """
         for variable_name in self.fluid_variables.keys():
-            self.plot_contours_over_time(variable_name)
+            self.plot_contours_over_time(variable_name, z)
+
+    def plot_streamlines_over_time(self, variable_name, z=0, show_fig=False):
+        """
+        Plot streamlines for the magnetic field and velocity
+
+        Parameters
+        ----------
+        variable_name : str
+            The name of the variable to plot contours for. Options are "u" and
+            "B"
+        z : int, default=0
+            The z-coordinate to plot the variable at. The default is 0 which
+            plots the variable in the z = 0 plane. This should be used if the
+            data set is 2D.
+        show_fig : bool, default=False
+            Whether to show the figure
+        """
+        u = self.fluid_variables[f"{variable_name}_x"]
+        v = self.fluid_variables[f"{variable_name}_y"]
+        times = np.linspace(0, self.t[-1], 9).astype(np.int64)
+        mpl.rc('xtick', labelsize=4) 
+        mpl.rc('ytick', labelsize=4)
+        fig, axes = plt.subplots(3,3, figsize=(16,10))
+        for i in range(3):
+            for j in range(3):
+                time = times[i*3+j]
+                axes[i,j].set_title(f"{variable_name} at time = {time}")
+                axes[i,j].set_xlabel("x", {'fontsize': 4})
+                axes[i,j].set_ylabel("y", {'fontsize': 4})
+                axes[i,j].streamplot(self.x[:,:,z], self.y[:,:,z],u[:,:,z,time], v[:,:,z,time], density=1.5, linewidth=0.5) 
+                axes[i,j].grid(True)
+        self.save_show_plot(fig, f"{variable_name}_{z}_streamlines", show_fig)
+
+    def plot_all_streamlines_over_time(self, z=0):
+        """
+        Plot streamlines for all the vector-valued variables
+
+        Parameters
+        ----------
+        z : int, default=0
+            The z-coordinate to plot the variable at. The default is 0 which plots
+            the variable in the z = 0 plane. This should be used if the data set is
+            2D.
+        """
+        for variable_name in ["u","B"]:
+            self.plot_streamlines_over_time(variable_name, z)
+
     # Additional Variables
+    # --------------------------------------------------------------------------
     def add_all_variables(self):
         """
         Add all the possible additional fluid variables

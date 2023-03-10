@@ -20,6 +20,8 @@ Simulation Class
     .. automethod:: plot_contour_at_time
     .. automethod:: plot_contours_over_time
     .. automethod:: plot_all_contours_over_time
+    .. automethod:: plot_streamlines_over_time
+    .. automethod:: plot_all_streamlines_over_time
 
     .. rubric:: Add Additional Variables
     .. automethod:: add_all_variables
