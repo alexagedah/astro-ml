@@ -99,7 +99,9 @@ class Simulation():
     add_kinetic_energy_density()
         Add kinetic energy density to the fluid variables
     add_plasma_beta()
-        Add plasma beta the the fluid variables
+        Add plasma beta to the fluid variables
+    add_over_beta()
+        Add 1/plasma beta to the fluid variabels
     add_alfven_wave_speed()
         Add alfven wave speed to the fluid variables
     add_speed_of_sound()
@@ -481,6 +483,7 @@ class Simulation():
 
     def add_over_beta(self):
         """
+        Add 1/(plasma beta) to the fluid variables
         """
         self.fluid_variables["over_beta"] = ((
             self.fluid_variables["B_x"]**2 +
