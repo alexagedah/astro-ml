@@ -5,7 +5,7 @@ of the features
 """
 DEFAULT_VARIABLES = ["B_x","B_y","B_z","p","rho","u_x","u_y","u_z"] # "default"
 TWOD_VARIABLES = ["B_x","B_y","p","rho","u_x","u_y"] # "2d"
-EXTRA_VARIABLES = ["B","E_m","u","u_squared","KE","beta","v_A","v_s","H_m"] # "extras"
+EXTRA_VARIABLES = ["B","E_m","u","u_squared","KE","over_beta","v_A","v_s","H_m"] # "extras"
 
 def verbose_features(features):
     """
