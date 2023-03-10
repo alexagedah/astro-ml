@@ -17,7 +17,7 @@ mpl.rcParams["font.family"] = "Times New Roman"
 plt.style.use("default")
 
 # Constants
-MU_0 = constants.physical_constants["vacuum mag. permeability"][0]
+MU_0 = 1
 GAMMA = 5/3
 
 class Simulation():
@@ -478,6 +478,14 @@ class Simulation():
             self.fluid_variables["B_x"]**2 +
             self.fluid_variables["B_y"]**2 + 
             self.fluid_variables["B_z"]**2)/(2*MU_0))
+
+    def add_over_beta(self):
+        """
+        """
+        self.fluid_variables["over_beta"] = ((
+            self.fluid_variables["B_x"]**2 +
+            self.fluid_variables["B_y"]**2 + 
+            self.fluid_variables["B_z"]**2)/(2*MU_0))/self.fluid_variables["p"]
 
     def add_alfven_wave_speed(self):
         """
