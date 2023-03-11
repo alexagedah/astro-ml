@@ -37,8 +37,16 @@ class Simulation():
         The name of the folder which will contain all the plots 
     x : numpy.ndaaray
         3D numpy.ndarray representing the x-coordiantes
+    x_min : float
+        The minimum coordinate on the x-axis
+    x_max : float
+        The maximum coordinate on the x-axis
     y : numpy.ndarray
         3D numpy.ndarray representing the y-coordiantes
+    y_min : float
+        The minimum coordinate on the y-axis
+    y_max : float
+        The maximum coordinate on the y-axis
     z : numpy.ndarray
         3D numpy.ndarray representing the z-coordiantes
     t : numpy.ndarray
@@ -62,30 +70,40 @@ class Simulation():
         Return a matrix of features and a vector of responses.
     get_feature_map(features)
         Return a dictionary mapping indicies to features
+
+    Plotting Methods
+    ----------------
     plot_all()
         Plot all the initialised fluid variables
     plot_distribution_at_time(variable_name, time=None, show_fig=False)
         Plot a histogram showing the distribution of a variable
     plot_all_distributions_at_time(time=None)
          Plot the distributions of all the variables at a certain time
-    plot_distributions_over_time(variable_name, show_fig=False)
+    plot_distributions_over_time(variable_name, n_rows=3, n_cols=3, show_fig=False)
         Plot the distribution of a variable at various times through the
         simulation
-    plot_all_distributions_over_time()
+    plot_all_distributions_over_time(n_rows=3, n_cols=3)
         Plot the distributions of all the variables at various times through
         the simulation
-    plot_contour_at_time(self, variable_name, time, z=0, show_fig=False)
+    plot_contour_at_time(variable_name, time, z=0, show_fig=False)
         Plot contours for a variable at a specific time
     plot_all_contours_at_time(time, z=0)
         Plot contours of all the variables at a specific time 
-    plot_contours_over_time(self, variable_name, z=0, show_fig=False)
+    plot_contours_over_time(variable_name, z=0, n_rows=3, n_cols=6, show_fig=False)
         Plot contours for a variable in a plane at various times
-    plot_all_contours_over_time(z=0)
+    plot_all_contours_over_time(z=0, n_rows=3, n_cols-6)
         Plot contours for all the variables in a plane at various times
-    plot_streamlines_over_time(variable_name, z=0)
+    plot_images_over_time(variable_name, z=0, n_rows=3, n_cols=6, show_fig=False)
+        Plot images for a variable over time in the specified plane
+    plot_all_images_over_time(z=0, n_rows=3, n_cols=6)
+        Plot image for all the variables at various times in the specified plane
+    plot_streamlines_over_time(variable_name, z=0, n_rows=3, n_cols=6, show_fig=False)
         Plot streamlines for the variable
-    plot_all_streamlines_over_time(z=0)
+    plot_all_streamlines_over_time(z=0, n_rows=3, n_cols=6)
         Plot streamlines for all the vector-valued variables
+
+    Additional Variables
+    --------------------
     add_all_variables()
         Add all the possible additional fluid variables
     add_magnetic_field_magnitude()
@@ -114,6 +132,10 @@ class Simulation():
         self.exploration_folder = f"exploration/{filename[5:]}/"
         self.chi = float(filename[10:].replace("dot","."))
         self.x, self.y, self.z = read.get_cell_coordinates(filename)
+        self.x_min = self.x[0,0,0]
+        self.x_max = self.x[0,-1,0]
+        self.y_min = self.y[0,0,0]
+        self.y_max = self.y[-1,0,0]
         self.t = read.get_time_coordinates(filename)
         self.fluid_variables = read.get_fluid_variables(filename)
 
@@ -251,7 +273,7 @@ class Simulation():
         for variable_name in self.fluid_variables.keys():
             self.plot_distribution_at_time(variable_name, time)
 
-    def plot_distributions_over_time(self, variable_name, show_fig=False):
+    def plot_distributions_over_time(self, variable_name, n_rows=3, n_cols=3, show_fig=False):
         """
         Plot the distributions of a variable at various times through the
         simulation
@@ -260,25 +282,29 @@ class Simulation():
         ----------
         variable_name : numpy.ndarray
             The name of the variabele
+        n_rows : int
+            The number of rows to include in the plot
+        n_cols : int
+            The number of columns to include in the plot
         show_fig : bool, default=False
             Whether to show the figure
         """
-        times_to_plot = np.linspace(0, self.t[-1], 9).astype(np.int64)
+        times_to_plot = np.linspace(0, self.t[-1], n_rows*n_cols).astype(np.int64)
         variable_to_plot = self.fluid_variables[variable_name]
         array = variable_to_plot.reshape(-1, variable_to_plot.shape[-1])[:,times_to_plot]
         mpl.rc('xtick', labelsize=4) 
         mpl.rc('ytick', labelsize=4) 
-        fig, axes = plt.subplots(3,3, figsize=(16,10))
-        for i in range(3):
-            for j in range(3):
-                time = times_to_plot[i*3+j]
-                axes[i,j].hist(array[:,i*3+j], bins = 100)
+        fig, axes = plt.subplots(n_rows,n_cols, figsize=(16,10))
+        for i in range(n_rows):
+            for j in range(n_cols):
+                time = times_to_plot[i*n_cols+j]
+                axes[i,j].hist(array[:,i*n_cols+j], bins = 100)
                 axes[i,j].set_title(f"The Distribution of {variable_name} at time = {time}", {'fontsize':10})
                 axes[i,j].set_xlabel(variable_name, {'fontsize': 4})
                 axes[i,j].set_ylabel("Frequency", {'fontsize': 4})
         self.save_show_plot(fig, f"{variable_name}_distributions_over_time", show_fig)
 
-    def plot_all_distributions_over_time(self):
+    def plot_all_distributions_over_time(self, n_rows=3, n_cols=3):
         """
         Plot the distributions of all the variables at various times through the
         simulation
@@ -291,7 +317,7 @@ class Simulation():
             Whether to show the figure
         """
         for variable_name in self.fluid_variables.keys():
-            self.plot_distributions_over_time(variable_name)
+            self.plot_distributions_over_time(variable_name, n_rows, n_cols)
 
     def plot_contour_at_time(self, variable_name, time, z=0, show_fig=False):
         """
@@ -324,7 +350,7 @@ class Simulation():
         ax.grid(True)
         self.save_show_plot(fig, f"{variable_name}_{z}_contour_at_{time}", show_fig)
 
-    def plot_contours_over_time(self, variable_name, z=0, show_fig=False):
+    def plot_contours_over_time(self, variable_name, z=0, n_rows=3, n_cols=6, show_fig=False):
         """
         Plot contours for a variable in a plane at various times
 
@@ -336,29 +362,31 @@ class Simulation():
             The z-coordinate to plot the variable at. The default is 0 which plots
             the variable in the z = 0 plane. This should be used if the data set is
             2D.
+        n_rows : int
+            The number of rows to include in the plot
+        n_cols : int
+            The number of columns to include in the plot
         show_fig : bool, default=False
             Whether to show the figure
         """
-        x = self.x
-        y = self.y
         variable = self.fluid_variables[variable_name]
 
-        times = np.linspace(0, variable.shape[-1]-1, 9).astype(np.int64)
+        times = np.linspace(0, self.t[-1], n_rows*n_cols).astype(np.int64)
         mpl.rc('xtick', labelsize=4) 
         mpl.rc('ytick', labelsize=4) 
-        fig, axes = plt.subplots(3,3, figsize=(16,10))
-        for i in range(3):
-            for j in range(3):
-                time = times[i*3+j]
+        fig, axes = plt.subplots(n_rows,n_cols, figsize=(16,10))
+        for i in range(n_rows):
+            for j in range(n_cols):
+                time = times[i*n_cols+j]
                 axes[i,j].set_title(f"{variable_name} at time = {time}")
+                axes[i,j].set_aspect(1)
                 axes[i,j].set_xlabel("x", {'fontsize': 4})
                 axes[i,j].set_ylabel("y", {'fontsize': 4})
-                CS = axes[i,j].contour(x[:,:,z], y[:,:,z],variable[:,:,z,time]) 
+                CS = axes[i,j].contour(self.x[:,:,z], self.y[:,:,z],variable[:,:,z,time]) 
                 axes[i,j].clabel(CS, inline=True, fontsize=5)
-                axes[i,j].grid(True)
         self.save_show_plot(fig, f"{variable_name}_{z}_contours", show_fig)
 
-    def plot_all_contours_over_time(self, z=0):
+    def plot_all_contours_over_time(self, z=0, n_rows=3, n_cols=6):
         """
         Plot contours for all the variables at various times
 
@@ -370,9 +398,59 @@ class Simulation():
             2D.
         """
         for variable_name in self.fluid_variables.keys():
-            self.plot_contours_over_time(variable_name, z)
+            self.plot_contours_over_time(variable_name, z, n_rows, n_cols)
 
-    def plot_streamlines_over_time(self, variable_name, z=0, show_fig=False):
+    def plot_images_over_time(self, variable_name, z=0, n_rows=3, n_cols=6, show_fig=False):
+        """
+        Plot images for a variable over time in the specified plane
+
+        Parameters
+        ----------
+        variable_name : str
+            The name of the variable to plot contours for
+        z : int, default=0
+            The z-coordinate to plot the variable at. The default is 0 which plots
+            the variable in the z = 0 plane. This should be used if the data set is
+            2D.
+        n_rows : int
+            The number of rows to include in the plot
+        n_cols : int
+            The number of columns to include in the plot
+        show_fig : bool, default=False
+            Whether to show the figure
+        """
+        variable = self.fluid_variables[variable_name]
+
+        times = np.linspace(0, self.t[-1], n_rows*n_cols).astype(np.int64)
+        mpl.rc('xtick', labelsize=4) 
+        mpl.rc('ytick', labelsize=4) 
+        fig, axes = plt.subplots(n_rows,n_cols, figsize=(16,10))
+        for i in range(n_rows):
+            for j in range(n_cols):
+                time = times[i*n_cols+j]
+                axes[i,j].set_title(f"{variable_name} at time = {time}")
+                axes[i,j].set_xlabel("x", {'fontsize': 4})
+                axes[i,j].set_ylabel("y", {'fontsize': 4})
+                axes[i,j].set_xticks(self.y[0,:,0])
+                pos = axes[i,j].imshow(variable[:,:,z,time])
+                fig.colorbar(pos, ax=axes[i,j])
+        self.save_show_plot(fig, f"{variable_name}_{z}_images", show_fig)
+
+    def plot_all_images_over_time(self, z=0, n_rows=3, n_cols=6):
+        """
+        Plot image for all the variables at various times in the specified plane
+
+        Parameters
+        ----------
+        z : int, default=0
+            The z-coordinate to plot the variable at. The default is 0 which plots
+            the variable in the z = 0 plane. This should be used if the data set is
+            2D.
+        """
+        for variable_name in self.fluid_variables.keys():
+            self.plot_images_over_time(variable_name, z, n_rows, n_cols)
+
+    def plot_streamlines_over_time(self, variable_name, z=0, n_rows = 3, n_cols=6, show_fig=False):
         """
         Plot streamlines for the magnetic field and velocity
 
@@ -385,18 +463,22 @@ class Simulation():
             The z-coordinate to plot the variable at. The default is 0 which
             plots the variable in the z = 0 plane. This should be used if the
             data set is 2D.
+        n_rows : int
+            The number of rows to include in the plot
+        n_cols : int
+            The number of columns to include in the plot
         show_fig : bool, default=False
             Whether to show the figure
         """
         u = self.fluid_variables[f"{variable_name}_x"]
         v = self.fluid_variables[f"{variable_name}_y"]
-        times = np.linspace(0, self.t[-1], 9).astype(np.int64)
+        times = np.linspace(0, self.t[-1], n_rows*n_cols).astype(np.int64)
         mpl.rc('xtick', labelsize=4) 
         mpl.rc('ytick', labelsize=4)
-        fig, axes = plt.subplots(3,3, figsize=(16,10))
-        for i in range(3):
-            for j in range(3):
-                time = times[i*3+j]
+        fig, axes = plt.subplots(n_rows,n_cols, figsize=(16,10))
+        for i in range(n_rows):
+            for j in range(n_cols):
+                time = times[i*n_cols+j]
                 axes[i,j].set_title(f"{variable_name} at time = {time}")
                 axes[i,j].set_xlabel("x", {'fontsize': 4})
                 axes[i,j].set_ylabel("y", {'fontsize': 4})
@@ -404,7 +486,7 @@ class Simulation():
                 axes[i,j].grid(True)
         self.save_show_plot(fig, f"{variable_name}_{z}_streamlines", show_fig)
 
-    def plot_all_streamlines_over_time(self, z=0):
+    def plot_all_streamlines_over_time(self, z=0, n_rows=3, n_cols=6):
         """
         Plot streamlines for all the vector-valued variables
 
@@ -416,7 +498,7 @@ class Simulation():
             2D.
         """
         for variable_name in ["u","B"]:
-            self.plot_streamlines_over_time(variable_name, z)
+            self.plot_streamlines_over_time(variable_name, z, n_rows, n_cols)
 
     # Additional Variables
     # --------------------------------------------------------------------------
