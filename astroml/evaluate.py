@@ -150,6 +150,7 @@ def plot_confusion_matrix(y, y_pred, response, model_name):
     disp.plot(ax=ax1, 
         include_values=False,
         xticks_rotation="vertical")
+    plt.tight_layout()
     fig.savefig(f"results/{model_name}_confusion")
 
 def evaluate(model, X_train, X_valid, y_train_scaled, y_valid_scaled):
