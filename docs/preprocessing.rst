@@ -1,7 +1,7 @@
 Preprocessing
 =============
 
-.. automodule:: astroml.preprocessing.preprocessor
+.. automodule:: astroml.preprocessing.preprocessors
 
 Functions
 ---------
