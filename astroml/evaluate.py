@@ -99,7 +99,7 @@ def chi_accuracy(y, y_pred):
     accuracy : float
     """
     y = chi_responses(y)
-    y_pred = chi_predictions(y_pred)
+    y_pred = chi_responses(y_pred)
     accuracy = accuracy_score(y, y_pred)
     return accuracy
 
