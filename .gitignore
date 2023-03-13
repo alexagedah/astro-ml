@@ -9,7 +9,8 @@ __pycache__/
 *.docx
 
 exploration.py
-tester.py
+tester_time.py
+tester_chi.py
 trainer_time.py
 trainer_all_times.py
 trainer_chi.py
